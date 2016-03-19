@@ -89,6 +89,10 @@ func getAllForStock(w http.ResponseWriter, r *http.Request) {
 
 	r.ParseForm()
 	ticker := r.PostFormValue("ticker")
+	if ticker == "" {
+		http.Error(w, "Invalid Request!", http.StatusBadRequest)
+		return
+	}
 
 	stocks := doDatabaseQuery("select id, to_timestamp(timestamp) as timestamp, ticker, close, high, low, open, volume from historic where ticker = $1", ticker)
 
