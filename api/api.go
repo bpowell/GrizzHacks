@@ -97,9 +97,38 @@ func getAllForStock(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func getRangeForStock(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "Invalid Request!", http.StatusMethodNotAllowed)
+		return
+	}
+
+	r.ParseForm()
+	ticker := r.PostFormValue("ticker")
+	start := r.PostFormValue("start")
+	end := r.PostFormValue("end")
+
+	if start == "" || ticker == "" {
+		http.Error(w, "Invalid Request!", http.StatusBadRequest)
+		return
+	}
+
+	var stocks []Stock
+	if end == "" {
+		stocks = doDatabaseQuery("select id, to_timestamp(timestamp) as timestamp, ticker, close, high, low, open, volume from historic where ticker = $1 and timestamp >= $2", ticker, start)
+	} else {
+		stocks = doDatabaseQuery("select id, to_timestamp(timestamp) as timestamp, ticker, close, high, low, open, volume from historic where ticker = $1 and timestamp >= $2 and timestamp <= $3", ticker, start, end)
+	}
+
+	if err := json.NewEncoder(w).Encode(stocks); err != nil {
+		panic(err)
+	}
+}
+
 func main() {
 	fmt.Println(config)
 
 	http.HandleFunc("/api/getall", getAllForStock)
+	http.HandleFunc("/api/getrange", getRangeForStock)
 	http.ListenAndServe(":8080", nil)
 }
