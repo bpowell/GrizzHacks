@@ -62,6 +62,25 @@ func workerpool(i int, jobs <-chan string, results chan<- bool) {
 	}
 }
 
+func getAllTickers() []string {
+	rows, err := db.Query("select upper(ticker) from tickers")
+	if err != nil {
+		panic(err)
+	}
+
+	var tickers []string
+
+	for rows.Next() {
+		var ticker string
+		if err = rows.Scan(&ticker); err != nil {
+			panic(err)
+		}
+		tickers = append(tickers, ticker)
+	}
+
+	return tickers
+}
+
 func main() {
 	url := fmt.Sprintf(URL, "GOOGL", "2016-03-18")
 	resp, err := http.Get(url)
