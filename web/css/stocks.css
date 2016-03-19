@@ -28,13 +28,15 @@ Stocks Color Reference List:
     color: #505050;
     background-color: #FFFFFF;
 		border-style: solid;
-    border-width: 5px;
+    border-width: 3px;
     border-color: #505050;
 		padding: 10px;
 }
 
 /* Footer */
 .stocksFooter {
+		position: fixed;
+		bottom: 2px;
     color: #505050;
     background-color: #BEBEBE;
     border: none;
