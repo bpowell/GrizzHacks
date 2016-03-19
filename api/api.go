@@ -61,8 +61,8 @@ func init() {
 	}
 }
 
-func doDatabaseQuery(sql string) []Stock {
-	rows, err := db.Query(sql)
+func doDatabaseQuery(sql string, args ...interface{}) []Stock {
+	rows, err := db.Query(sql, args...)
 	if err != nil {
 		panic(err)
 	}
@@ -81,8 +81,16 @@ func doDatabaseQuery(sql string) []Stock {
 	return stocks
 }
 
-func testHandler(w http.ResponseWriter, r *http.Request) {
-	stocks := doDatabaseQuery("select id, to_timestamp(timestamp) as timestamp, ticker, close, high, low, open, volume from historic where ticker = 'googl' and timestamp > 145871332")
+func getAllForStock(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "Invalid Request!", http.StatusMethodNotAllowed)
+		return
+	}
+
+	r.ParseForm()
+	ticker := r.PostFormValue("ticker")
+
+	stocks := doDatabaseQuery("select id, to_timestamp(timestamp) as timestamp, ticker, close, high, low, open, volume from historic where ticker = $1", ticker)
 
 	if err := json.NewEncoder(w).Encode(stocks); err != nil {
 		panic(err)
@@ -92,6 +100,6 @@ func testHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	fmt.Println(config)
 
-	http.HandleFunc("/api/test", testHandler)
+	http.HandleFunc("/api/getall", getAllForStock)
 	http.ListenAndServe(":8080", nil)
 }
