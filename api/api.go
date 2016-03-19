@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	_ "github.com/lib/pq"
@@ -83,7 +84,7 @@ func getAllForStock(w http.ResponseWriter, r *http.Request) {
 	}
 
 	r.ParseForm()
-	ticker := r.PostFormValue("ticker")
+	ticker := strings.ToLower(r.PostFormValue("ticker"))
 	if ticker == "" {
 		http.Error(w, "Invalid Request!", http.StatusBadRequest)
 		return
@@ -103,7 +104,7 @@ func getRangeForStock(w http.ResponseWriter, r *http.Request) {
 	}
 
 	r.ParseForm()
-	ticker := r.PostFormValue("ticker")
+	ticker := strings.ToLower(r.PostFormValue("ticker"))
 	start := r.PostFormValue("start")
 	end := r.PostFormValue("end")
 
@@ -131,7 +132,7 @@ func getDayForStock(w http.ResponseWriter, r *http.Request) {
 	}
 
 	r.ParseForm()
-	ticker := r.PostFormValue("ticker")
+	ticker := strings.ToLower(r.PostFormValue("ticker"))
 	date := r.PostFormValue("date")
 
 	if date == "" || ticker == "" {
