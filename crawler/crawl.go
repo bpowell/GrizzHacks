@@ -80,21 +80,16 @@ func main() {
 	var f func(*html.Node)
 	f = func(n *html.Node) {
 		if n.Type == html.ElementNode && n.Data == "table" {
-			fmt.Println("table")
 			tbody := n.FirstChild
 			for tr := tbody.FirstChild; tr != nil; tr = tr.NextSibling {
-				fmt.Println("tablebody")
 				td := tr.FirstChild
 				if td.Type == html.ElementNode && td.Data == "td" {
-					fmt.Println("td")
 					div := td.FirstChild
 					if div == nil {
-						fmt.Println(div)
 						break
 					}
 
 					if div.Type == html.ElementNode && div.Data == "div" {
-						fmt.Println("div")
 						for c := div.FirstChild; c != nil; c = c.NextSibling {
 							if c.Type == html.ElementNode && c.Data == "ul" {
 								for li := c.FirstChild; li != nil; li = li.NextSibling {
