@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -58,8 +59,16 @@ func init() {
 	}
 }
 
-func workerpool(i int, jobs <-chan string, results chan<- bool) {
+func workerpoolGetUrlsToGrab(i int, jobs <-chan string, results chan<- []string) {
 	for url := range jobs {
+		fmt.Printf("%d working on %s\n", i, url)
+		urls, err := getLinks(url)
+		if err != nil {
+			results <- urls
+			continue
+		}
+
+		results <- urls
 	}
 }
 
@@ -101,31 +110,30 @@ func getDates() []string {
 	return dates
 }
 
-func getLinks(ticker, date string) []string {
-	url := fmt.Sprintf(URL, ticker, date)
+func getLinks(url string) ([]string, error) {
 	var urls []string
 
 	resp, err := http.Get(url)
 	defer resp.Body.Close()
 	if err != nil {
-		panic(err)
+		return urls, err
 	}
 
 	if resp.StatusCode != 200 {
-		fmt.Printf("Cannot get %s %s\n", ticker, date)
-		return urls
+		fmt.Printf("Cannot get %s\n", url)
+		return urls, errors.New("Bad")
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		panic(err)
+		return urls, err
 	}
 
 	page := string(body)
 
 	doc, err := html.Parse(strings.NewReader(page))
 	if err != nil {
-		panic(err)
+		return urls, err
 	}
 
 	var f func(*html.Node)
@@ -163,9 +171,20 @@ func getLinks(ticker, date string) []string {
 	}
 	f(doc)
 
-	return urls
+	return urls, nil
 }
 
 func main() {
-	fmt.Println(getLinks("GOOGL", "2016-03-18"))
+	jobs := make(chan string, 100)
+	results := make(chan []string, 100)
+
+	for w := 0; w < 1; w++ {
+		go workerpoolGetUrlsToGrab(w, jobs, results)
+	}
+
+	var urls []string
+	jobs <- fmt.Sprintf(URL, "GOOGL", "2016-03-18")
+	urls = <-results
+
+	fmt.Println(urls)
 }
