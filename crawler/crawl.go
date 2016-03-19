@@ -77,6 +77,7 @@ func main() {
 		panic(err)
 	}
 
+	var urls []string
 	var f func(*html.Node)
 	f = func(n *html.Node) {
 		if n.Type == html.ElementNode && n.Data == "table" {
@@ -94,7 +95,9 @@ func main() {
 							if c.Type == html.ElementNode && c.Data == "ul" {
 								for li := c.FirstChild; li != nil; li = li.NextSibling {
 									if li.FirstChild.Type == html.ElementNode && li.FirstChild.Data == "a" {
-										fmt.Println(li.FirstChild.Attr)
+										for _, a := range li.FirstChild.Attr {
+											urls = append(urls, a.Val)
+										}
 									}
 								}
 							}
@@ -109,4 +112,6 @@ func main() {
 		}
 	}
 	f(doc)
+
+	fmt.Println(urls)
 }
