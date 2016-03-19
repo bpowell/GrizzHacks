@@ -1,0 +1,15 @@
+/*
+Stocks Color Reference List:
+	DarkGrey: #505050
+  LightGrey: #BEBEBE
+  White: #FFFFFF
+  Blue: #C3C3CCB
+*/
+
+
+/* Header */
+.stocksHeader {
+    color: #505050;
+    background-color: #BEBEBE;
+    border: none;
+}
