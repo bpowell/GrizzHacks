@@ -101,12 +101,19 @@ func getDates() []string {
 	return dates
 }
 
-func main() {
-	url := fmt.Sprintf(URL, "GOOGL", "2016-03-18")
+func getLinks(ticker, date string) []string {
+	url := fmt.Sprintf(URL, ticker, date)
+	var urls []string
+
 	resp, err := http.Get(url)
 	defer resp.Body.Close()
 	if err != nil {
 		panic(err)
+	}
+
+	if resp.StatusCode != 200 {
+		fmt.Printf("Cannot get %s %s\n", ticker, date)
+		return urls
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
@@ -121,7 +128,6 @@ func main() {
 		panic(err)
 	}
 
-	var urls []string
 	var f func(*html.Node)
 	f = func(n *html.Node) {
 		if n.Type == html.ElementNode && n.Data == "table" {
@@ -157,5 +163,9 @@ func main() {
 	}
 	f(doc)
 
-	fmt.Println(urls)
+	return urls
+}
+
+func main() {
+	fmt.Println(getLinks("GOOGL", "2016-03-18"))
 }
