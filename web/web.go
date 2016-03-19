@@ -10,7 +10,6 @@ var templates *template.Template
 func compileTemplates() {
 	t, err := template.ParseFiles(
 		"tmpl/header.tmpl",
-		"tmpl/footer.tmpl",
 		"tmpl/index.tmpl")
 
 	templates = template.Must(t, err)
@@ -19,7 +18,6 @@ func compileTemplates() {
 func rootHandler(w http.ResponseWriter, r *http.Request) {
 	templates.ExecuteTemplate(w, "header.tmpl", nil)
 	templates.ExecuteTemplate(w, "index.tmpl", nil)
-	templates.ExecuteTemplate(w, "footer.tmpl", nil)
 }
 
 func main() {
