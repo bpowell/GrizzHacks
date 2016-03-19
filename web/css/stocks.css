@@ -15,15 +15,6 @@ Stocks Color Reference List:
 		padding: 10px;
 }
 
-/* Footer */
-.stocksFooter {
-    color: #505050;
-    background-color: #BEBEBE;
-    border: none;
-    padding: 10px;
-		margin-top: 300px;
-}
-
 .stocksIndexContent {
     color: #505050;
     background-color: #FFFFFF;
@@ -31,13 +22,4 @@ Stocks Color Reference List:
     border-width: 3px;
     border-color: #505050;
 		padding: 10px;
-}
-
-/* Footer */
-.stocksFooter {
-		position: fixed;
-		bottom: 2px;
-    color: #505050;
-    background-color: #BEBEBE;
-    border: none;
 }
