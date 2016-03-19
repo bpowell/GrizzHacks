@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	_ "github.com/lib/pq"
 	"golang.org/x/net/html"
@@ -79,6 +80,25 @@ func getAllTickers() []string {
 	}
 
 	return tickers
+}
+
+func getDates() []string {
+	var dates []string
+
+	const shortForm = "2006-Jan-02"
+	start, _ := time.Parse(shortForm, "2016-Jan-03")
+	end, _ := time.Parse(shortForm, "2016-Mar-19")
+
+	for current := start; !current.Equal(end); current = current.AddDate(0, 0, 1) {
+		if current.Weekday() == 0 || current.Weekday() == 6 {
+			continue
+		}
+
+		date := fmt.Sprintf("%d-%d-%d", current.Year(), current.Month(), current.Day())
+		dates = append(dates, date)
+	}
+
+	return dates
 }
 
 func main() {
