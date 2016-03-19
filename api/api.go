@@ -36,12 +36,6 @@ type Stock struct {
 	Volume    float32
 }
 
-type StockRequest struct {
-	Ticker    string
-	StartTime string
-	EndTime   string
-}
-
 func init() {
 	file, err := os.Open("config.json")
 	if err != nil {
