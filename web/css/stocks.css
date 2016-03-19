@@ -38,3 +38,7 @@ Stocks Color Reference List:
 	font-family: Lato;
 	font-size: 13px;
 }
+
+body {
+	padding-top: 0px !important;
+}
