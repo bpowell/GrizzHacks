@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	_ "github.com/lib/pq"
 )
@@ -123,10 +124,37 @@ func getRangeForStock(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func getDayForStock(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "Invalid Request!", http.StatusMethodNotAllowed)
+		return
+	}
+
+	r.ParseForm()
+	ticker := r.PostFormValue("ticker")
+	date := r.PostFormValue("date")
+
+	if date == "" || ticker == "" {
+		http.Error(w, "Invalid Request!", http.StatusBadRequest)
+		return
+	}
+
+	const shortForm = "2006-Jan-02"
+	time, _ := time.Parse(shortForm, date)
+	start := time.Unix()
+	end := time.AddDate(0, 0, 1).Unix()
+
+	stocks := doDatabaseQuery("select id, to_timestamp(timestamp) as timestamp, ticker, close, high, low, open, volume from historic where ticker = $1 and timestamp >= $2 and timestamp <= $3", ticker, start, end)
+	if err := json.NewEncoder(w).Encode(stocks); err != nil {
+		panic(err)
+	}
+}
+
 func main() {
 	fmt.Println(config)
 
 	http.HandleFunc("/api/getall", getAllForStock)
 	http.HandleFunc("/api/getrange", getRangeForStock)
+	http.HandleFunc("/api/getday", getDayForStock)
 	http.ListenAndServe(":8080", nil)
 }
