@@ -57,6 +57,11 @@ func init() {
 	}
 }
 
+func workerpool(i int, jobs <-chan string, results chan<- bool) {
+	for url := range jobs {
+	}
+}
+
 func main() {
 	url := fmt.Sprintf(URL, "GOOGL", "2016-03-18")
 	resp, err := http.Get(url)
