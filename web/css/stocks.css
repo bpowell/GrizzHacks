@@ -15,7 +15,7 @@ Stocks Color Reference List:
 		padding: 10px;
 }
 
-.stocksIndexContent {
+.stocksMainContent {
     color: #505050;
     background-color: #FFFFFF;
 		border-style: solid;
@@ -26,4 +26,15 @@ Stocks Color Reference List:
 
 .indexContent {
 	margin-top: 100px;
+}
+
+.axis path {
+	fill: none;
+	stroke: #777;
+	shape-rendering: crispEdges;
+}
+
+.axis text {
+	font-family: Lato;
+	font-size: 13px;
 }

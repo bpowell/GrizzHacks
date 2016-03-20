@@ -131,6 +131,8 @@ func getDayForStock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
 	r.ParseForm()
 	ticker := strings.ToLower(r.PostFormValue("ticker"))
 	date := r.PostFormValue("date")
