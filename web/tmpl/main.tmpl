@@ -4,25 +4,52 @@
 			<div class="col-md-7 stocksMainContent">
 				<div class="panel panel-default">
           <div class="panel-heading">
-            <p>Yesterdays Ticker</p>
+            <p>Yesterdays {{ .Ticker }} Ticker</p>
           </div>
 					<div class="panel-body">
 						<div class="jumbotron">
             	<svg id="visualisation" width=100% height="500"></svg>
             	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
             	<script>
+								var minx;
+								var maxx;
+								var miny;
+								var maxy;
 								$( document ).ready(function() {
 									$.ajax({
 										type: "POST",
 										url: 'http://104.131.18.185:8080/api/getday',
-										data: { ticker: "googl", date: "2016-Mar-18" },
+										data: { ticker: "{{ .Ticker }}", date: "2016-Mar-18" },
 										success:function(a){
 											var time_close = [];
+											minx = Date.parse(a[0].Timestamp);
+											minx = minx / 60000;
+											maxx = Date.parse(a[0].Timestamp);
+											maxx = maxx / 60000;
+											miny = a[0].Close;
+											maxy = a[0].Close;
 											for (i = 0; i < a.length; i++) {
 												var newtimestamp = Date.parse(a[i].Timestamp);
 												newtimestamp = newtimestamp/60000;
 												time_close.push({"Timestamp":newtimestamp, "Close":a[i].Close});
+
+												if (newtimestamp > maxx) {
+													maxx = newtimestamp;
+												}
+												if (newtimestamp < minx) {
+													minx = newtimestamp;
+												}
+												if (a[i].Close > maxy) {
+													maxy = a[i].Close;
+												}
+												if (a[i].Close < miny) {
+													miny = a[i].Close;
+												}
 											}
+											console.log("FINAL_MINX = " + minx);
+											console.log("FINAL_MAXX = " + maxx);
+											console.log("FINAL_MINY (before margin) = " + miny);
+											console.log("FINAL_MAXY (before margin) = " + maxy);
 											InitChart(time_close);
 										},
 										error: function(){
@@ -42,8 +69,8 @@
                             bottom: 20,
                             left: 50
                         },
-                        xScale = d3.scale.linear().range([MARGINS.left, WIDTH - MARGINS.right]).domain([24305130, 24305138]),
-                        yScale = d3.scale.linear().range([HEIGHT - MARGINS.top, MARGINS.bottom]).domain([755, 765]),
+                        xScale = d3.scale.linear().range([MARGINS.left, WIDTH - MARGINS.right]).domain([minx, maxx]),
+                        yScale = d3.scale.linear().range([HEIGHT - MARGINS.top, MARGINS.bottom]).domain([miny, maxy]),
                         xAxis = d3.svg.axis()
                         .scale(xScale),
                         yAxis = d3.svg.axis()
