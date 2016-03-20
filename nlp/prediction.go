@@ -27,6 +27,7 @@ type UniqueWords struct {
 func main() {
 
 	var correct, incorrect, total int
+	var accuracy float32
 	tickers := []string{"GOOG", "GOOGL", "APPL"}
 
 	for _, ticker_symbol := range tickers {
