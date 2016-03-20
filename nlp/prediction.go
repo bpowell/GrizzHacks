@@ -24,16 +24,22 @@ type UniqueWords struct {
 	ArticleId int
 }
 
+var current_stock, current_working_file, max_stock, max_file int
+
 func main() {
 
 	var correct, incorrect, total int
 	var accuracy float32
 	tickers := []string{"GOOG", "GOOGL", "APPL"}
 
-	for _, ticker_symbol := range tickers {
+	max_stock = len(tickers)
+	for y, ticker_symbol := range tickers {
 		article_data := GetArticleId(ticker_symbol)
+		current_stock = y + 6
 
-		for _, info := range article_data {
+		max_file = len(article_data)
+		for i, info := range article_data {
+			current_working_file = i
 			parsed_article := normalize.GetArticles(strconv.Itoa(info.Id))
 			word_distribution := normalize.ArticleUniqeWords(parsed_article)
 
@@ -129,7 +135,10 @@ func main() {
 func GetPrediciton(words map[string]int) float32 {
 	var sum float32
 	var total int
+	var max_word, current_word int
+	max_word = len(words)
 	for word, _ := range words {
+		current_word++
 		api_url := "http://104.131.18.185:8080/api/getinfoforword"
 		data := url.Values{}
 		data.Add("word", word)
@@ -156,7 +165,7 @@ func GetPrediciton(words map[string]int) float32 {
 			sum += (float32(w.Count) * w.Weights)
 			total += w.Count
 		}
-		fmt.Println("SumTotak:", sum, total)
+		fmt.Println("SumTotak:", sum, total, "--", current_stock, "/", max_stock, "--", current_working_file, "/", max_file, "--", current_word, "/", max_word)
 	}
 	return (sum / float32(total))
 }

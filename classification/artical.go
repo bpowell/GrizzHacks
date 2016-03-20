@@ -118,7 +118,9 @@ func RetriveStockTick(ticker string, start, end time.Time) (Stock, Stock, error)
 		return Stock{}, Stock{}, err
 	}
 
-	//TODO: Catch the size of the stock array and do checking
-
-	return stocks[0], stocks[len(stocks)-1], nil
+	if len(stocks) != 0 {
+		return stocks[0], stocks[len(stocks)-1], nil
+	} else {
+		return Stock{}, Stock{}, nil
+	}
 }
