@@ -248,6 +248,17 @@ func getRawArticleById(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(raw))
 }
 
+func validateArticleId(id string) error {
+	var dbId int
+	err = db.QueryRow("select id from articles where id = $1", id).Scan(&dbId)
+	switch {
+	case err != nil:
+		return err
+	}
+
+	return nil
+}
+
 func updateCountForArticleId(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Invalid Request!", http.StatusMethodNotAllowed)
@@ -265,10 +276,7 @@ func updateCountForArticleId(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var dbId int
-	err = db.QueryRow("select id from articles where id = $1", id).Scan(&dbId)
-	switch {
-	case err != nil:
+	if validateArticleId(id) != nil {
 		http.Error(w, "Invalid Request!", http.StatusBadRequest)
 		return
 	}
