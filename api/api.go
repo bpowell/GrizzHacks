@@ -290,6 +290,37 @@ func updateCountForArticleId(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("OK"))
 }
 
+func updateWeightsForArticle(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "Invalid Request!", http.StatusMethodNotAllowed)
+		return
+	}
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	r.ParseForm()
+	id := strings.ToLower(r.PostFormValue("id"))
+	weights, err := strconv.ParseFloat(r.PostFormValue("weights"), 32)
+
+	if id == "" {
+		http.Error(w, "Invalid Request!", http.StatusBadRequest)
+		return
+	}
+
+	if validateArticleId(id) != nil {
+		http.Error(w, "Invalid Request!", http.StatusBadRequest)
+		return
+	}
+
+	err = db.QueryRow(`update articles set weights = $1 where id = $2 returning id`, weights, id).Scan(&id)
+	if err != nil {
+		http.Error(w, "Invalid Request!", http.StatusBadRequest)
+		return
+	}
+
+	w.Write([]byte("OK"))
+}
+
 func main() {
 	fmt.Println(config)
 
@@ -300,5 +331,6 @@ func main() {
 	http.HandleFunc("/api/getarticleids", getIdsForArticlesForTicker)
 	http.HandleFunc("/api/getarticle", getRawArticleById)
 	http.HandleFunc("/api/updatecount", updateCountForArticleId)
+	http.HandleFunc("/api/updateweights", updateWeightsForArticle)
 	http.ListenAndServe(":8080", nil)
 }
