@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -247,6 +248,40 @@ func getRawArticleById(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(raw))
 }
 
+func updateCountForArticleId(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "Invalid Request!", http.StatusMethodNotAllowed)
+		return
+	}
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	r.ParseForm()
+	id := strings.ToLower(r.PostFormValue("id"))
+	count, err := strconv.Atoi(r.PostFormValue("count"))
+
+	if id == "" {
+		http.Error(w, "Invalid Request!", http.StatusBadRequest)
+		return
+	}
+
+	var dbId int
+	err = db.QueryRow("select id from articles where id = $1", id).Scan(&dbId)
+	switch {
+	case err != nil:
+		http.Error(w, "Invalid Request!", http.StatusBadRequest)
+		return
+	}
+
+	err = db.QueryRow(`update articles set count = $1 where id = $2 returning id`, count, id).Scan(&id)
+	if err != nil {
+		http.Error(w, "Invalid Request!", http.StatusBadRequest)
+		return
+	}
+
+	w.Write([]byte("OK"))
+}
+
 func main() {
 	fmt.Println(config)
 
@@ -256,5 +291,6 @@ func main() {
 	http.HandleFunc("/api/gettickers", getAllTickers)
 	http.HandleFunc("/api/getarticleids", getIdsForArticlesForTicker)
 	http.HandleFunc("/api/getarticle", getRawArticleById)
+	http.HandleFunc("/api/updatecount", updateCountForArticleId)
 	http.ListenAndServe(":8080", nil)
 }
