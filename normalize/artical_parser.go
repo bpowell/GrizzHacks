@@ -7,10 +7,12 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 
 	"golang.org/x/net/html"
+	"golang.org/x/net/html/atom"
 )
 
 type ArticleIdAndDate struct {
@@ -18,11 +20,11 @@ type ArticleIdAndDate struct {
 	Date string
 }
 
-var remove_table map[string]string = map[string]string{
-	"<script>": "</script>",
-	"/*":       "*/",
-	"{":        "}",
-}
+var (
+	spacingRe = regexp.MustCompile(`[ \r\n\t]+`)
+	newlineRe = regexp.MustCompile(`\n\n+`)
+)
+
 var remove_line []string = []string{
 	"<script>",
 	"</script>",
@@ -58,7 +60,7 @@ func main() {
 		//return ArticleIdAndDate{}, ArticleIdAndDate{}, err
 	}
 
-	fmt.Println(article_id_and_date)
+	//fmt.Println(article_id_and_date)
 	GetArticles(strconv.Itoa(article_id_and_date[0].Id))
 }
 
@@ -81,59 +83,8 @@ func GetArticles(id string) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	body_split := strings.Split(string(body), " ")
-	fmt.Println(len(body_split))
 
-	for remove_open, remove_close := range remove_table {
-		body_split = RemoveBlocks(body_split, remove_open, remove_close)
-	}
-	for _, tag := range remove_line {
-		body_split = RemoveLines(body_split, tag)
-	}
-	body_split = RemoveBlocks(body_split, "<script>", "Dink")
-	fmt.Println(len(body_split))
-	fmt.Println(body_split)
-}
-
-func RemoveLines(body []string, tag string) []string {
-	fmt.Println("Removeing Lines with tag " + tag)
-	length := len(body)
-	for i := 0; i < length; i++ {
-		if strings.Contains(body[i], tag) {
-			body = append(body[:i], body[i+1:]...)
-			i--
-			length--
-		}
-	}
-	return body
-}
-
-func RemoveBlocks(body []string, open_tag, close_tag string) []string {
-	fmt.Println("Removeing Lines from tag " + open_tag + "->" + close_tag)
-	var start_index, end_index, line_count int
-
-	length := len(body)
-	for i := 0; i < length; i++ {
-		if strings.Contains(body[i], open_tag) {
-			fmt.Println(body[i])
-			start_index = i
-		}
-		if strings.Contains(body[i], close_tag) {
-			fmt.Println(body[i])
-			end_index = i + 1
-			line_count += end_index - start_index
-			fmt.Println(start_index, end_index, line_count)
-
-			body = append(body[:start_index], body[end_index:]...)
-			i = start_index
-			length -= (end_index - start_index)
-			fmt.Println(i)
-			fmt.Println(len(body))
-			fmt.Println(length)
-		}
-		//fmt.Println(i, length)
-	}
-	return body
+	ParseHtml(string(body))
 }
 
 func ParseHtml(raw_html string) {
@@ -141,14 +92,26 @@ func ParseHtml(raw_html string) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	var f func(*html.Node)
-	f = func(n *html.Node) {
-		if n.Type == html.ElementNode && n.Data == "a" {
-			// Do something with n...
+	var string_array []string
+	var f func(*html.Node, *html.Node)
+	f = func(node *html.Node, parent_node_type *html.Node) {
+		fmt.Println(node, parent_node_type)
+		if parent_node_type != nil {
+			switch parent_node_type.DataAtom {
+
+			case atom.P, atom.Ul, atom.Table, atom.A, atom.H1, atom.H2, atom.H3, atom.H4, atom.H5, atom.H6, atom.Tr, atom.Td, atom.Th, atom.Span, atom.Strong, atom.Li:
+				switch node.Type {
+				case html.TextNode:
+					string_array = append(string_array, node.Data)
+				}
+			}
 		}
-		for c := n.FirstChild; c != nil; c = c.NextSibling {
-			f(c)
+		for c := node.FirstChild; c != nil; c = c.NextSibling {
+			f(c, node)
 		}
 	}
-	f(doc)
+	f(doc, nil)
+	fmt.Println(string_array)
+	ArticleUniqeWords(strings.Join(string_array, " "))
+	ArticleUniqeWords(strings.Join(string_array, " "))
 }

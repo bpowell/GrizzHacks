@@ -3,9 +3,14 @@ package main
 import (
 	"html/template"
 	"net/http"
+	"strings"
 )
 
 var templates *template.Template
+
+type info struct {
+	Ticker string
+}
 
 func compileTemplates() {
 	t, err := template.ParseFiles(
@@ -22,7 +27,7 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 
 func mainHandler(w http.ResponseWriter, r *http.Request) {
 	templates.ExecuteTemplate(w, "header.tmpl", nil)
-	templates.ExecuteTemplate(w, "main.tmpl", nil)
+	templates.ExecuteTemplate(w, "main.tmpl", &info{strings.ToUpper(r.URL.Query().Get("ticker"))})
 }
 
 func main() {
