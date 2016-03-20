@@ -25,7 +25,7 @@ type Stock struct {
 }
 
 func main() {
-	ArticleClassifacation("3/18/2016-9:35:00", "6h24m0s")
+	fmt.Println(ArticleClassifacation("3/18/2016-9:35:00", "0h20m0s"))
 }
 
 //Format expected MM/DD/YYYY-HH:MM:SS, #h#m#s
@@ -77,6 +77,7 @@ func ArticleClassifacation(article_date_time string, interval_time string) (floa
 	future_time := article_time.Add(interval)
 	past_time := article_time.Add(negitive_interval)
 
+	var percent_change float32
 	if future_time.After(market_open) && future_time.Before(market_close) {
 		//TODO:Refine this so that i can get a more accurate stock price relitive to the time
 		start_amount_stock, end_amount_stock, _ := RetriveStockTick(past_time, future_time)
@@ -84,25 +85,20 @@ func ArticleClassifacation(article_date_time string, interval_time string) (floa
 		starting_close := start_amount_stock.Close
 		ending_close := end_amount_stock.Close
 
-		fmt.Println(start_amount_stock, end_amount_stock)
-		percent_change := ((ending_close - starting_close) / starting_close) * 100
-		fmt.Println(percent_change)
-		fmt.Println(start_amount_stock.Open)
-		fmt.Println(end_amount_stock.Close)
+		percent_change = ((ending_close - starting_close) / starting_close) * 100
 	} else {
 		return 0, errors.New("Your time is outside the bounds of the market")
 	}
-	return 00, nil
+	return percent_change, nil
 }
 
 func RetriveStockTick(start, end time.Time) (Stock, Stock, error) {
 	api_url := "http://104.131.18.185:8080/api/getrange"
 	data := url.Values{}
-	data.Add("ticker", "ADPNW")
+	data.Add("ticker", "GOOGL")
 	data.Add("start", strconv.FormatInt(start.Unix(), 10))
 	data.Add("end", strconv.FormatInt(end.Unix(), 10))
 
-	fmt.Println(data)
 	client := &http.Client{}
 	r, _ := http.NewRequest("POST", api_url, bytes.NewBufferString(data.Encode())) // <-- URL-encoded payload
 	r.Header.Add("Content-Type", "application/x-www-form-urlencoded")
@@ -118,7 +114,6 @@ func RetriveStockTick(start, end time.Time) (Stock, Stock, error) {
 		return Stock{}, Stock{}, err
 	}
 
-	fmt.Println(response.Status)
 	var stocks []Stock
 	decoder := json.NewDecoder(strings.NewReader(string(body)))
 	err = decoder.Decode(&stocks)
@@ -127,9 +122,6 @@ func RetriveStockTick(start, end time.Time) (Stock, Stock, error) {
 	}
 
 	//TODO: Catch the size of the stock array and do checking
-	fmt.Println(start, end)
-	fmt.Println(start.Unix(), end.Unix())
-	fmt.Println(stocks)
 
 	return stocks[0], stocks[len(stocks)-1], nil
 }
