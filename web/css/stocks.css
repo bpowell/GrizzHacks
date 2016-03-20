@@ -1,6 +1,6 @@
 /*
 Stocks Color Reference List:
-	DarkGrey: #505050
+	DarkGrey: #333
   LightGrey: #BEBEBE
   White: #FFFFFF
   Blue: #C3C3CCB
@@ -9,14 +9,14 @@ Stocks Color Reference List:
 
 /* Header */
 .stocksHeader {
-    color: #505050;
+    color: #333;
     background-color: #BEBEBE;
     border: none;
 		padding: 10px;
 }
 
 .stocksMainContent {
-    color: #505050;
+    color: #333;
     background-color: #FFFFFF;
 		padding: 10px;
 }
@@ -36,6 +36,30 @@ Stocks Color Reference List:
 	font-size: 13px;
 }
 
+.input-group-btn .btn-default {
+	color: #333;
+	border-color: #333;
+	background-color: #BEBEBE;
+}
+
+.input-group .form-control {
+	color: #333;
+	border-color: #333;
+}
+
 body {
 	padding-top: 0px !important;
+}
+
+.panel-default .panel-heading {
+	color: #9d9d9d !important;
+	background-color: #101010 !important;
+	font-size: 1.5em;
+}
+
+.panel-body {
+	border-style: solid;
+	border-width: 1px;
+	border-color: #333;
+	border-radius: 3px;
 }

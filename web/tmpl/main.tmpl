@@ -4,76 +4,35 @@
 			<div class="col-md-7 stocksMainContent">
 				<div class="panel panel-default">
           <div class="panel-heading">
-            <p>test panel head</p>
+            <p>Yesterdays Ticker</p>
           </div>
 					<div class="panel-body">
 						<div class="jumbotron">
             	<svg id="visualisation" width=100% height="500"></svg>
             	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
             	<script>
-$( document ).ready(function() {
-  $.ajax({
-    type: "POST",
-    url: 'http://104.131.18.185:8080/api/getday',
-    data: { ticker: "googl", date: "2016-Mar-18" },
-    success:function(a){
-      var time_close = [];
-      for (i = 0; i < a.length; i++) { 
-				var newtimestamp = Date.parse(a[i].Timestamp);
-				newtimestamp = newtimestamp/60000;
-				console.log(newtimestamp);
-        time_close.push({"Timestamp":newtimestamp, "Close":a[i].Close});
-      }
-      console.log(time_close);
-      InitChart(time_close);
-    },
-    error: function(){
-      console.log("Handle error")
-    },
-    dataType: 'json'
-  });
-});
+								$( document ).ready(function() {
+									$.ajax({
+										type: "POST",
+										url: 'http://104.131.18.185:8080/api/getday',
+										data: { ticker: "googl", date: "2016-Mar-18" },
+										success:function(a){
+											var time_close = [];
+											for (i = 0; i < a.length; i++) {
+												var newtimestamp = Date.parse(a[i].Timestamp);
+												newtimestamp = newtimestamp/60000;
+												time_close.push({"Timestamp":newtimestamp, "Close":a[i].Close});
+											}
+											InitChart(time_close);
+										},
+										error: function(){
+											console.log("Handle error")
+										},
+										dataType: 'json'
+									});
+								});
 
               function InitChart(list) {
-                console.log("OOOO" + list);
-                    var data = [{
-                        "sale": "202",
-                        "year": "2000"
-                    }, {
-                        "sale": "215",
-                        "year": "2002"
-                    }, {
-                        "sale": "179",
-                        "year": "2004"
-                    }, {
-                        "sale": "199",
-                        "year": "2006"
-                    }, {
-                        "sale": "134",
-                        "year": "2008"
-                    }, {
-                        "sale": "176",
-                        "year": "2010"
-                    }];
-                    var data2 = [{
-                        "sale": "152",
-                        "year": "2000"
-                    }, {
-                        "sale": "189",
-                        "year": "2002"
-                    }, {
-                        "sale": "179",
-                        "year": "2004"
-                    }, {
-                        "sale": "199",
-                        "year": "2006"
-                    }, {
-                        "sale": "134",
-                        "year": "2008"
-                    }, {
-                        "sale": "176",
-                        "year": "2010"
-                    }];
                     var vis = d3.select("#visualisation"),
                         WIDTH = 1000,
                         HEIGHT = 500,
@@ -121,7 +80,7 @@ $( document ).ready(function() {
 			<div class="col-md-3 stocksMainContent">
 				<div class="panel panel-default">
           <div class="panel-heading">
-            <p>test panel head</p>
+            <p>Test Panel Head</p>
           </div>
 					<div class="panel-body">
 						<svg class="visualisation" width="100%"; height="500"></svg>
@@ -135,7 +94,7 @@ $( document ).ready(function() {
 			<div class="col-md-6 stocksMainContent">
 				<div class="panel panel-default">
           <div class="panel-heading">
-            <p>test panel head</p>
+            <p>Test Panel Head</p>
           </div>
 					<div class="panel-body">
 						<svg class="visualisation" width="100%"; height="500"></svg>
@@ -145,7 +104,7 @@ $( document ).ready(function() {
 			<div class="col-md-4 stocksMainContent">
 				<div class="panel panel-default">
           <div class="panel-heading">
-            <p>test panel head</p>
+            <p>Test Panel Head</p>
           </div>
 					<div class="panel-body">
 						<svg class="visualisation" width="100%"; height="500"></svg>
