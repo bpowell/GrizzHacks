@@ -8,3 +8,4 @@
 5. /api/getarticleids POST Requies: {ticker: ''}
 6. /api/getarticle POST Requires: {id: ''}
 7. /api/updatecount POST Requires: {id: '', count: ''}
+8. /api/updateweights POST Requires: {id: '', weights: ''}
