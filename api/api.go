@@ -408,6 +408,34 @@ func getAllWordsForArticle(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func getWeightByWord(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "Invalid Request!", http.StatusMethodNotAllowed)
+		return
+	}
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	r.ParseForm()
+	word := strings.ToLower(r.PostFormValue("word"))
+
+	if word == "" {
+		http.Error(w, "Invalid Request!", http.StatusBadRequest)
+		return
+	}
+
+	var weight float32
+	err := db.QueryRow("select weights from uniquewords where word = $1", word).Scan(&weight)
+	switch {
+	case err != nil:
+		http.Error(w, "Invalid Request!", http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(fmt.Sprintf("[%f]", weight)))
+}
+
 func main() {
 	fmt.Println(config)
 
@@ -421,5 +449,6 @@ func main() {
 	http.HandleFunc("/api/updateweights", updateWeightsForWord)
 	http.HandleFunc("/api/adduniqueword", addUniqueWordForArticle)
 	http.HandleFunc("/api/getwodsforarticle", getAllWordsForArticle)
+	http.HandleFunc("/api/getWeightByWord", getWeightByWord)
 	http.ListenAndServe(":8080", nil)
 }
