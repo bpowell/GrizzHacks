@@ -1,13 +1,11 @@
-package main
+package normalize
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"regexp"
 	"strconv"
 	"strings"
 
@@ -15,56 +13,21 @@ import (
 	"golang.org/x/net/html/atom"
 )
 
-type ArticleIdAndDate struct {
-	Id   int
-	Date string
+var remove_table map[string]string = map[string]string{
+	"<script>": "</script>",
+	"/*":       "*/",
+	"{":        "}",
 }
-
-var (
-	spacingRe = regexp.MustCompile(`[ \r\n\t]+`)
-	newlineRe = regexp.MustCompile(`\n\n+`)
-)
 
 var remove_line []string = []string{
 	"<script>",
 	"</script>",
 	"<\\/script>",
-	"function",
+	"//",
+	"* ",
 }
 
-func main() {
-	api_url := "http://104.131.18.185:8080/api/getarticleids"
-	data := url.Values{}
-	data.Add("ticker", "GOOGL")
-
-	client := &http.Client{}
-	r, _ := http.NewRequest("POST", api_url, bytes.NewBufferString(data.Encode())) // <-- URL-encoded payload
-	r.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	r.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
-
-	response, err := client.Do(r)
-	if err != nil {
-		fmt.Println(err)
-	}
-	defer response.Body.Close()
-	body, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	var article_id_and_date []ArticleIdAndDate
-	decoder := json.NewDecoder(strings.NewReader(string(body)))
-	err = decoder.Decode(&article_id_and_date)
-	if err != nil {
-		fmt.Println(err)
-		//return ArticleIdAndDate{}, ArticleIdAndDate{}, err
-	}
-
-	//fmt.Println(article_id_and_date)
-	GetArticles(strconv.Itoa(article_id_and_date[0].Id))
-}
-
-func GetArticles(id string) {
+func GetArticles(id string) string {
 	api_url := "http://104.131.18.185:8080/api/getarticle"
 	data := url.Values{}
 	data.Add("id", id)
@@ -84,10 +47,57 @@ func GetArticles(id string) {
 		fmt.Println(err)
 	}
 
-	ParseHtml(string(body))
+	body_split := ParseHtml(string(body))
+	//body_split := strings.Split(string(body), " ")
+
+	for remove_open, remove_close := range remove_table {
+		body_split = RemoveBlocks(body_split, remove_open, remove_close)
+	}
+	for _, tag := range remove_line {
+		body_split = RemoveLines(body_split, tag)
+	}
+
+	//ParseHtml(strings.Join(body_split, " "))
+
+	return strings.Join(body_split, " ")
+
 }
 
-func ParseHtml(raw_html string) {
+func RemoveLines(body []string, tag string) []string {
+	fmt.Println("Removeing Lines with tag " + tag)
+	length := len(body)
+	for i := 0; i < length; i++ {
+		if strings.Contains(body[i], tag) {
+			body = append(body[:i], body[i+1:]...)
+			i--
+			length--
+		}
+	}
+	return body
+}
+
+func RemoveBlocks(body []string, open_tag, close_tag string) []string {
+	fmt.Println("Removeing Block from tag " + open_tag + "->" + close_tag)
+	var start_index, end_index, line_count int
+
+	length := len(body)
+	for i := 0; i < length; i++ {
+		if strings.Contains(body[i], open_tag) {
+			start_index = i
+		}
+		if strings.Contains(body[i], close_tag) {
+			end_index = i + 1
+			line_count += end_index - start_index
+
+			body = append(body[:start_index], body[end_index:]...)
+			i = start_index
+			length -= (end_index - start_index)
+		}
+	}
+	return body
+}
+
+func ParseHtml(raw_html string) []string {
 	doc, err := html.Parse(strings.NewReader(raw_html))
 	if err != nil {
 		fmt.Println(err)
@@ -95,11 +105,10 @@ func ParseHtml(raw_html string) {
 	var string_array []string
 	var f func(*html.Node, *html.Node)
 	f = func(node *html.Node, parent_node_type *html.Node) {
-		fmt.Println(node, parent_node_type)
 		if parent_node_type != nil {
 			switch parent_node_type.DataAtom {
 
-			case atom.P, atom.Ul, atom.Table, atom.A, atom.H1, atom.H2, atom.H3, atom.H4, atom.H5, atom.H6, atom.Tr, atom.Td, atom.Th, atom.Span, atom.Strong, atom.Li:
+			case atom.P, atom.Ul, atom.Table, atom.A, atom.H1, atom.H2, atom.H3, atom.H4, atom.H5, atom.H6, atom.Tr, atom.Td, atom.Th, atom.Span, atom.Strong, atom.Li, atom.Abbr, atom.Div:
 				switch node.Type {
 				case html.TextNode:
 					string_array = append(string_array, node.Data)
@@ -111,7 +120,5 @@ func ParseHtml(raw_html string) {
 		}
 	}
 	f(doc, nil)
-	fmt.Println(string_array)
-	ArticleUniqeWords(strings.Join(string_array, " "))
-	ArticleUniqeWords(strings.Join(string_array, " "))
+	return string_array
 }

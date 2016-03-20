@@ -1,4 +1,4 @@
-package main
+package classification
 
 import (
 	"bytes"
@@ -24,10 +24,6 @@ type Stock struct {
 	Volume    float32
 }
 
-func main() {
-	fmt.Println(ArticleClassifacation("3/18/2016-9:35:00", "0h20m0s"))
-}
-
 //Format expected MM/DD/YYYY-HH:MM:SS, #h#m#s
 func ArticleClassifacation(article_date_time string, interval_time string) (float32, error) {
 	time_zone, _ := time.LoadLocation("America/New_York")
@@ -37,15 +33,15 @@ func ArticleClassifacation(article_date_time string, interval_time string) (floa
 	split_article_date := strings.Split(split_article_date_time[0], "/")
 	split_article_time := strings.Split(split_article_date_time[1], ":")
 
-	article_year, err := strconv.Atoi(split_article_date[2])
+	article_year, err := strconv.Atoi(split_article_date[0])
 	if err != nil {
 		return 0, err
 	}
-	article_month, err := strconv.Atoi(split_article_date[0])
+	article_month, err := strconv.Atoi(split_article_date[1])
 	if err != nil {
 		return 0, err
 	}
-	article_day, err := strconv.Atoi(split_article_date[1])
+	article_day, err := strconv.Atoi(split_article_date[2])
 	if err != nil {
 		return 0, err
 	}
@@ -89,6 +85,7 @@ func ArticleClassifacation(article_date_time string, interval_time string) (floa
 	} else {
 		return 0, errors.New("Your time is outside the bounds of the market")
 	}
+	fmt.Println(percent_change)
 	return percent_change, nil
 }
 
