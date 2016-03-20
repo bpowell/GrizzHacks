@@ -22,7 +22,7 @@ type ArticleIdAndDate struct {
 
 var current_file_lenght, current_file int
 
-func main() {
+func AddWeights() {
 
 	tickers := []string{"GOOG", "GOOGL", "APPL"}
 
@@ -72,7 +72,7 @@ func main() {
 			new_date := strings.Replace(info.Date, "-", "/", -1)
 			date_time := new_date + "-" + article_time
 			fmt.Println(date_time)
-			weight, _ := classification.ArticleClassifacation(date_time, "0h20m0s")
+			weight, _ := classification.ArticleClassifacation(ticker_symbol, date_time, "0h20m0s")
 			fmt.Println(weight)
 			AddWordsCountsWeights(info.Id, word_distribution, weight)
 		}
@@ -98,11 +98,12 @@ func AddWordsCountsWeights(id int, words map[string]int, weights float32) {
 		r.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
 
 		response, err := client.Do(r)
+		defer response.Body.Close()
 		if err != nil {
 			fmt.Println(err)
 			fmt.Println(response.Status)
 		}
-		fmt.Println(current_file, "/", current_file_lenght, "-", count, "/", total)
+		fmt.Println(current_file, "/", current_file_lenght, "-", count, "/", total, "--", response.Status)
 	}
 }
 

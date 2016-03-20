@@ -25,7 +25,7 @@ type Stock struct {
 }
 
 //Format expected MM/DD/YYYY-HH:MM:SS, #h#m#s
-func ArticleClassifacation(article_date_time string, interval_time string) (float32, error) {
+func ArticleClassifacation(ticker string, article_date_time string, interval_time string) (float32, error) {
 	time_zone, _ := time.LoadLocation("America/New_York")
 
 	// Start Article time----------------------------
@@ -76,7 +76,7 @@ func ArticleClassifacation(article_date_time string, interval_time string) (floa
 	var percent_change float32
 	if future_time.After(market_open) && future_time.Before(market_close) {
 		//TODO:Refine this so that i can get a more accurate stock price relitive to the time
-		start_amount_stock, end_amount_stock, _ := RetriveStockTick(past_time, future_time)
+		start_amount_stock, end_amount_stock, _ := RetriveStockTick(ticker, past_time, future_time)
 
 		starting_close := start_amount_stock.Close
 		ending_close := end_amount_stock.Close
@@ -89,10 +89,10 @@ func ArticleClassifacation(article_date_time string, interval_time string) (floa
 	return percent_change, nil
 }
 
-func RetriveStockTick(start, end time.Time) (Stock, Stock, error) {
+func RetriveStockTick(ticker string, start, end time.Time) (Stock, Stock, error) {
 	api_url := "http://104.131.18.185:8080/api/getrange"
 	data := url.Values{}
-	data.Add("ticker", "GOOGL")
+	data.Add("ticker", ticker)
 	data.Add("start", strconv.FormatInt(start.Unix(), 10))
 	data.Add("end", strconv.FormatInt(end.Unix(), 10))
 
