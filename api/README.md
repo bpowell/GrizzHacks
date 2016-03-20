@@ -12,3 +12,4 @@
 9. /api/adduniqueword POST Requires: {article_id: '', word: ''} Optional: {count: '', weights: ''}
 10. /api/getwodsforarticle POST Requires: {article_id: ''}
 11. /api/getinfoforword POST Requires: {word: ''}
+12. /api/getnlpwords POST Requires: {ticker: ''}
