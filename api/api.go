@@ -55,7 +55,7 @@ type UniqueWords struct {
 
 type NLPWords struct {
 	Word   string
-	Weight int
+	Weight float32
 	Ticker string
 }
 
@@ -467,7 +467,7 @@ func getNLPWords(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rows, err := db.Query("select word, uniquewords.weight, articles.ticker from uniquewords, articles where uniquewords.article_id = articles.id and articles.ticker = $1", ticker)
+	rows, err := db.Query("select word, uniquewords.weights, articles.ticker from uniquewords, articles where uniquewords.article_id = articles.id and articles.ticker = $1", ticker)
 	if err != nil {
 		panic(err)
 	}
