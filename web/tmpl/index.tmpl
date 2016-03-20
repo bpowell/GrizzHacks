@@ -1,8 +1,10 @@
 <!DOCTYPE HTML>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 
+<head>
 <link href="/css/stocks.css" rel="stylesheet" type="text/css" />
 <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+</head>
 
 <body>
 	<nav class="navbar navbar-inverse">
@@ -15,8 +17,8 @@
 	<div class="row indexContent">
 		<div class="col-md-3"></div>
 		<div class="col-lg-6">
-			<div class="input-group">
-				<input type="text" class="form-control" placeholder="Search for...">
+			<div class="input-group" id="prefetch">
+				<input type="text" class="form-control typeahead" placeholder="Search for...">
 				<span class="input-group-btn">
 					<button class="btn btn-default" type="button">Go!</button>
 				</span>
@@ -24,4 +26,18 @@
 		</div>
 		<div class="col-md-3"></div>
 	</div>
+    <script type="text/javascript">
+        var countries = new Bloodhound({
+                datumTokenizer: Bloodhound.tokenizers.whitespace,
+                queryTokenizer: Bloodhound.tokenizers.whitespace,
+                // url points to a json file that contains an array of country names, see
+                // https://github.com/twitter/typeahead.js/blob/gh-pages/data/countries.json
+                prefetch: 'http://104.131.18.185:8080/api/gettickers'
+        });
+
+        $('#prefetch .typeahead').typeahead(null, {
+                  name: 'countries',
+                  source: countries
+        });
+    </script>
 </body>
