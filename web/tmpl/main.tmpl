@@ -4,7 +4,7 @@
 			<div class="col-md-7 stocksMainContent">
 				<div class="panel panel-default">
           <div class="panel-heading">
-            <p>Yesterdays Ticker</p>
+            <p>Yesterdays {{ .Ticker }} Ticker</p>
           </div>
 					<div class="panel-body">
 						<div class="jumbotron">
@@ -19,7 +19,7 @@
 									$.ajax({
 										type: "POST",
 										url: 'http://104.131.18.185:8080/api/getday',
-										data: { ticker: "googl", date: "2016-Mar-18" },
+										data: { ticker: "{{ .Ticker }}", date: "2016-Mar-18" },
 										success:function(a){
 											var time_close = [];
 											minx = Date.parse(a[0].Timestamp);
