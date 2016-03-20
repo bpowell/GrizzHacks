@@ -214,6 +214,39 @@ func getIdsForArticlesForTicker(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func getRawArticleById(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "Invalid Request!", http.StatusMethodNotAllowed)
+		return
+	}
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	r.ParseForm()
+	id := strings.ToLower(r.PostFormValue("id"))
+
+	if id == "" {
+		http.Error(w, "Invalid Request!", http.StatusBadRequest)
+		return
+	}
+
+	rows, err := db.Query("select raw from articles where id = $1", id)
+	if err != nil {
+		panic(err)
+	}
+
+	defer rows.Close()
+
+	var raw string
+	for rows.Next() {
+		if err = rows.Scan(&raw); err != nil {
+			panic(err)
+		}
+	}
+
+	w.Write([]byte(raw))
+}
+
 func main() {
 	fmt.Println(config)
 
@@ -222,5 +255,6 @@ func main() {
 	http.HandleFunc("/api/getday", getDayForStock)
 	http.HandleFunc("/api/gettickers", getAllTickers)
 	http.HandleFunc("/api/getarticleids", getIdsForArticlesForTicker)
+	http.HandleFunc("/api/getarticle", getRawArticleById)
 	http.ListenAndServe(":8080", nil)
 }
