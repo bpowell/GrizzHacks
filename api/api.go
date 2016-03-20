@@ -153,11 +153,31 @@ func getDayForStock(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func getAllTickers(w http.ResponseWriter, r *http.Request) {
+	rows, err := db.Query("select array_to_json(array_agg(ticker)) as ticker from tickers")
+	if err != nil {
+		panic(err)
+	}
+
+	defer rows.Close()
+
+	var ticker string
+	for rows.Next() {
+		if err = rows.Scan(&ticker); err != nil {
+			panic(err)
+		}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(ticker))
+}
+
 func main() {
 	fmt.Println(config)
 
 	http.HandleFunc("/api/getall", getAllForStock)
 	http.HandleFunc("/api/getrange", getRangeForStock)
 	http.HandleFunc("/api/getday", getDayForStock)
+	http.HandleFunc("/api/gettickers", getAllTickers)
 	http.ListenAndServe(":8080", nil)
 }
