@@ -250,7 +250,7 @@ func getRawArticleById(w http.ResponseWriter, r *http.Request) {
 
 func validateArticleId(id string) error {
 	var dbId int
-	err = db.QueryRow("select id from articles where id = $1", id).Scan(&dbId)
+	err := db.QueryRow("select id from articles where id = $1", id).Scan(&dbId)
 	switch {
 	case err != nil:
 		return err
