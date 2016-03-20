@@ -321,6 +321,40 @@ func updateWeightsForArticle(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("OK"))
 }
 
+func addUniqueWordForArticle(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "Invalid Request!", http.StatusMethodNotAllowed)
+		return
+	}
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	r.ParseForm()
+	article_id := strings.ToLower(r.PostFormValue("article_id"))
+	word := r.PostFormValue("word")
+	weights, err := strconv.ParseFloat(r.PostFormValue("weights"), 32)
+	count, err := strconv.Atoi(r.PostFormValue("count"))
+
+	if article_id == "" || word == "" {
+		http.Error(w, "Invalid Request!", http.StatusBadRequest)
+		return
+	}
+
+	if validateArticleId(article_id) != nil {
+		http.Error(w, "Invalid Request!", http.StatusBadRequest)
+		return
+	}
+
+	var id int
+	err = db.QueryRow(`insert into uniquewords (word, weights, count, article_id) values($1, $2, $3, $4) returning id`, word, weights, count, article_id).Scan(&id)
+	if err != nil {
+		http.Error(w, "Invalid Request!", http.StatusBadRequest)
+		return
+	}
+
+	w.Write([]byte("OK"))
+}
+
 func main() {
 	fmt.Println(config)
 
@@ -332,5 +366,6 @@ func main() {
 	http.HandleFunc("/api/getarticle", getRawArticleById)
 	http.HandleFunc("/api/updatecount", updateCountForArticleId)
 	http.HandleFunc("/api/updateweights", updateWeightsForArticle)
+	http.HandleFunc("/api/adduniqueword", addUniqueWordForArticle)
 	http.ListenAndServe(":8080", nil)
 }
