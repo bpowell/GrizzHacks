@@ -7,3 +7,7 @@
 4. /api/gettickers GET
 5. /api/getarticleids POST Requies: {ticker: ''}
 6. /api/getarticle POST Requires: {id: ''}
+7. /api/updatecount POST Requires: {id: '', count: ''}- id is for uniqueword id
+8. /api/updateweights POST Requires: {id: '', weights: ''} - id is for uniqueword id
+9. /api/adduniqueword POST Requires: {article_id: '', word: ''} Optional: {count: '', weights: ''}
+10. /api/getwodsforarticle POST Requires: {article_id: ''}

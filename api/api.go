@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -41,6 +42,14 @@ type Stock struct {
 type ArticleIdAndDate struct {
 	Id   int
 	Date string
+}
+
+type UniqueWords struct {
+	Id        int
+	Word      string
+	Weights   float32
+	Count     int
+	ArticleId int
 }
 
 func init() {
@@ -247,6 +256,155 @@ func getRawArticleById(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(raw))
 }
 
+func validateArticleId(id string) error {
+	var dbId int
+	err := db.QueryRow("select id from articles where id = $1", id).Scan(&dbId)
+	switch {
+	case err != nil:
+		return err
+	}
+
+	return nil
+}
+
+func updateCountForWord(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "Invalid Request!", http.StatusMethodNotAllowed)
+		return
+	}
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	r.ParseForm()
+	id := strings.ToLower(r.PostFormValue("id"))
+	count, err := strconv.Atoi(r.PostFormValue("count"))
+
+	if id == "" {
+		http.Error(w, "Invalid Request!", http.StatusBadRequest)
+		return
+	}
+
+	if validateArticleId(id) != nil {
+		http.Error(w, "Invalid Request!", http.StatusBadRequest)
+		return
+	}
+
+	err = db.QueryRow(`update uniquewords set count = $1 where id = $2 returning id`, count, id).Scan(&id)
+	if err != nil {
+		http.Error(w, "Invalid Request!", http.StatusBadRequest)
+		return
+	}
+
+	w.Write([]byte("OK"))
+}
+
+func updateWeightsForWord(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "Invalid Request!", http.StatusMethodNotAllowed)
+		return
+	}
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	r.ParseForm()
+	id := strings.ToLower(r.PostFormValue("id"))
+	weights, err := strconv.ParseFloat(r.PostFormValue("weights"), 32)
+
+	if id == "" {
+		http.Error(w, "Invalid Request!", http.StatusBadRequest)
+		return
+	}
+
+	if validateArticleId(id) != nil {
+		http.Error(w, "Invalid Request!", http.StatusBadRequest)
+		return
+	}
+
+	err = db.QueryRow(`update uniquewords set weights = $1 where id = $2 returning id`, weights, id).Scan(&id)
+	if err != nil {
+		http.Error(w, "Invalid Request!", http.StatusBadRequest)
+		return
+	}
+
+	w.Write([]byte("OK"))
+}
+
+func addUniqueWordForArticle(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "Invalid Request!", http.StatusMethodNotAllowed)
+		return
+	}
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	r.ParseForm()
+	article_id := strings.ToLower(r.PostFormValue("article_id"))
+	word := r.PostFormValue("word")
+	weights, err := strconv.ParseFloat(r.PostFormValue("weights"), 32)
+	count, err := strconv.Atoi(r.PostFormValue("count"))
+
+	if article_id == "" || word == "" {
+		http.Error(w, "Invalid Request!", http.StatusBadRequest)
+		return
+	}
+
+	if validateArticleId(article_id) != nil {
+		http.Error(w, "Invalid Request!", http.StatusBadRequest)
+		return
+	}
+
+	var id int
+	err = db.QueryRow(`insert into uniquewords (word, weights, count, article_id) values($1, $2, $3, $4) returning id`, word, weights, count, article_id).Scan(&id)
+	if err != nil {
+		http.Error(w, "Invalid Request!", http.StatusBadRequest)
+		return
+	}
+
+	w.Write([]byte("OK"))
+}
+
+func getAllWordsForArticle(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "Invalid Request!", http.StatusMethodNotAllowed)
+		return
+	}
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	r.ParseForm()
+	article_id := strings.ToLower(r.PostFormValue("article_id"))
+
+	if article_id == "" {
+		http.Error(w, "Invalid Request!", http.StatusBadRequest)
+		return
+	}
+
+	if validateArticleId(article_id) != nil {
+		http.Error(w, "Invalid Request!", http.StatusBadRequest)
+		return
+	}
+
+	rows, err := db.Query("select id, word, weights, count, article_id from uniquewords where article_id = $1", article_id)
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+
+	var words []UniqueWords
+
+	for rows.Next() {
+		var word UniqueWords
+		if err = rows.Scan(&word.Id, &word.Word, &word.Weights, &word.Count, &word.ArticleId); err != nil {
+			panic(err)
+		}
+		words = append(words, word)
+	}
+
+	if err := json.NewEncoder(w).Encode(words); err != nil {
+		panic(err)
+	}
+}
+
 func main() {
 	fmt.Println(config)
 
@@ -256,5 +414,9 @@ func main() {
 	http.HandleFunc("/api/gettickers", getAllTickers)
 	http.HandleFunc("/api/getarticleids", getIdsForArticlesForTicker)
 	http.HandleFunc("/api/getarticle", getRawArticleById)
+	http.HandleFunc("/api/updatecount", updateCountForWord)
+	http.HandleFunc("/api/updateweights", updateWeightsForWord)
+	http.HandleFunc("/api/adduniqueword", addUniqueWordForArticle)
+	http.HandleFunc("/api/getwodsforarticle", getAllWordsForArticle)
 	http.ListenAndServe(":8080", nil)
 }
