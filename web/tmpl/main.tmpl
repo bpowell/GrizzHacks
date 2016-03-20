@@ -83,8 +83,8 @@ $( document ).ready(function() {
                             bottom: 20,
                             left: 50
                         },
-                        xScale = d3.scale.linear().range([MARGINS.left, WIDTH - MARGINS.right]).domain([2000, 2010]),
-                        yScale = d3.scale.linear().range([HEIGHT - MARGINS.top, MARGINS.bottom]).domain([134, 215]),
+                        xScale = d3.scale.linear().range([MARGINS.left, WIDTH - MARGINS.right]).domain([24305130, 24305138]),
+                        yScale = d3.scale.linear().range([HEIGHT - MARGINS.top, MARGINS.bottom]).domain([755, 765]),
                         xAxis = d3.svg.axis()
                         .scale(xScale),
                         yAxis = d3.svg.axis()
@@ -101,20 +101,15 @@ $( document ).ready(function() {
                         .call(yAxis);
                     var lineGen = d3.svg.line()
                         .x(function(d) {
-                            return xScale(d.year);
+                            return xScale(d.Timestamp);
                         })
                         .y(function(d) {
-                            return yScale(d.sale);
+                            return yScale(d.Close);
                         })
                         .interpolate("basis");
                     vis.append('svg:path')
-                        .attr('d', lineGen(data))
+                        .attr('d', lineGen(list))
                         .attr('stroke', 'green')
-                        .attr('stroke-width', 2)
-                        .attr('fill', 'none');
-                    vis.append('svg:path')
-                        .attr('d', lineGen(data2))
-                        .attr('stroke', 'blue')
                         .attr('stroke-width', 2)
                         .attr('fill', 'none');
                 }
