@@ -101,8 +101,10 @@
                 }
             	</script>
         		</div>
-							<a href="/main?ticker={{ .Ticker }}&date={{ .PrevDate }}">Prev day</a>
-							<a href="/main?ticker={{ .Ticker }}&date={{ .NextDate }}">Next day</a>
+						<div class="carlos">
+							<button><a href="/main?ticker={{ .Ticker }}&date={{ .PrevDate }}">Prev day</a></button>
+							<button><a href="/main?ticker={{ .Ticker }}&date={{ .NextDate }}">Next day</a></button>
+						</div>
 					</div>
 				</div>
 			</div>
