@@ -42,6 +42,7 @@ type Stock struct {
 type ArticleIdAndDate struct {
 	Id   int
 	Date string
+	Url  string
 }
 
 type UniqueWords struct {
@@ -205,7 +206,7 @@ func getIdsForArticlesForTicker(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var data []ArticleIdAndDate
-	rows, err := db.Query("select id, pubdate from articles where ticker = $1", strings.ToUpper(ticker))
+	rows, err := db.Query("select id, pubdate, url from articles where ticker = $1", strings.ToUpper(ticker))
 	if err != nil {
 		panic(err)
 	}
@@ -214,7 +215,7 @@ func getIdsForArticlesForTicker(w http.ResponseWriter, r *http.Request) {
 
 	for rows.Next() {
 		var d ArticleIdAndDate
-		if err = rows.Scan(&d.Id, &d.Date); err != nil {
+		if err = rows.Scan(&d.Id, &d.Date, &d.Url); err != nil {
 			panic(err)
 		}
 		data = append(data, d)
@@ -407,6 +408,43 @@ func getAllWordsForArticle(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func getUniqueWordsInfoByWord(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "Invalid Request!", http.StatusMethodNotAllowed)
+		return
+	}
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	r.ParseForm()
+	word := strings.ToLower(r.PostFormValue("word"))
+
+	if word == "" {
+		http.Error(w, "Invalid Request!", http.StatusBadRequest)
+		return
+	}
+
+	rows, err := db.Query("select id, weights, count, article_id from uniquewords where word = $1", word)
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+
+	var things []UniqueWords
+
+	for rows.Next() {
+		var t UniqueWords
+		if err = rows.Scan(&t.Id, &t.Weights, &t.Count, &t.ArticleId); err != nil {
+			panic(err)
+		}
+		things = append(things, t)
+	}
+
+	if err := json.NewEncoder(w).Encode(things); err != nil {
+		panic(err)
+	}
+}
+
 func main() {
 	fmt.Println(config)
 
@@ -420,5 +458,6 @@ func main() {
 	http.HandleFunc("/api/updateweights", updateWeightsForWord)
 	http.HandleFunc("/api/adduniqueword", addUniqueWordForArticle)
 	http.HandleFunc("/api/getwodsforarticle", getAllWordsForArticle)
+	http.HandleFunc("/api/getinfoforword", getUniqueWordsInfoByWord)
 	http.ListenAndServe(":8080", nil)
 }

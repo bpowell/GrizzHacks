@@ -37,9 +37,23 @@ Stocks Color Reference List:
 }
 
 .input-group-btn .btn-default {
-	color: #333;
-	border-color: #333;
-	background-color: #BEBEBE;
+	position: fixed !important;
+	bottom: 0px;
+	right: 0px;
+	color: #FFFFFF;
+	border-color: #FFFFFF;
+	background-color: #FFFFFF;
+	z-index: -100;
+}
+
+.input-group-btn .btn-default:hover {
+	position: fixed !important;
+	bottom: 0px;
+	right: 0px;
+	color: #FFFFFF;
+	border-color: #FFFFFF;
+	background-color: #FFFFFF;
+	z-index: -100;
 }
 
 .input-group .form-control {
@@ -62,4 +76,17 @@ body {
 	border-width: 1px;
 	border-color: #333;
 	border-radius: 3px;
+}
+
+.chart div {
+  font: 10px sans-serif;
+  background-color: steelblue;
+  text-align: right;
+  padding: 3px;
+  margin: 1px;
+  color: white;
+}
+
+.col-lg-6 .input-group {
+	width:100%
 }
