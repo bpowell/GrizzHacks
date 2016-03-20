@@ -290,7 +290,7 @@ func updateCountForArticleId(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("OK"))
 }
 
-func updateWeightsForArticle(w http.ResponseWriter, r *http.Request) {
+func updateWeightsForWord(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Invalid Request!", http.StatusMethodNotAllowed)
 		return
@@ -312,7 +312,7 @@ func updateWeightsForArticle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = db.QueryRow(`update articles set weights = $1 where id = $2 returning id`, weights, id).Scan(&id)
+	err = db.QueryRow(`update uniquewords set weights = $1 where id = $2 returning id`, weights, id).Scan(&id)
 	if err != nil {
 		http.Error(w, "Invalid Request!", http.StatusBadRequest)
 		return
@@ -365,7 +365,7 @@ func main() {
 	http.HandleFunc("/api/getarticleids", getIdsForArticlesForTicker)
 	http.HandleFunc("/api/getarticle", getRawArticleById)
 	http.HandleFunc("/api/updatecount", updateCountForArticleId)
-	http.HandleFunc("/api/updateweights", updateWeightsForArticle)
+	http.HandleFunc("/api/updateweights", updateWeightsForWord)
 	http.HandleFunc("/api/adduniqueword", addUniqueWordForArticle)
 	http.ListenAndServe(":8080", nil)
 }
