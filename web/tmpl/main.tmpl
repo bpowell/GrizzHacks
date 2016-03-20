@@ -4,7 +4,7 @@
 			<div class="col-md-7 stocksMainContent">
 				<div class="panel panel-default">
           <div class="panel-heading">
-            <p>Yesterdays {{ .Ticker }} Ticker</p>
+              <p>Yesterdays {{ .Ticker }} Ticker {{ .Date }}</p>
           </div>
 					<div class="panel-body">
 						<div class="jumbotron">
@@ -19,7 +19,7 @@
 									$.ajax({
 										type: "POST",
 										url: 'http://104.131.18.185:8080/api/getday',
-										data: { ticker: "{{ .Ticker }}", date: "2016-Mar-18" },
+                                        data: { ticker: "{{ .Ticker }}", date: "{{ .Date }}" },
 										success:function(a){
 											var time_close = [];
 											minx = Date.parse(a[0].Timestamp);
@@ -101,6 +101,8 @@
                 }
             	</script>
         		</div>
+                <a href="/main?ticker={{ .Ticker }}&date={{ .PrevDate }}">Prev day</a>
+                <a href="/main?ticker={{ .Ticker }}&date={{ .NextDate }}">Next day</a>
 					</div>
 				</div>
 			</div>
