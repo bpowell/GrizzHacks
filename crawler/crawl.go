@@ -40,6 +40,11 @@ type Article struct {
 	Ticker        string
 }
 
+type Data struct {
+	Ticker string
+	Date   string
+}
+
 func init() {
 	file, err := os.Open("config.json")
 	if err != nil {
@@ -59,10 +64,10 @@ func init() {
 	}
 }
 
-func workerpoolGetUrlsToGrab(i int, jobs <-chan string, results chan<- []string) {
-	for url := range jobs {
-		fmt.Printf("%d working on %s\n", i, url)
-		urls, err := getLinks(url)
+func workerpoolGetUrlsToGrab(i int, jobs <-chan Data, results chan<- []string) {
+	for data := range jobs {
+		fmt.Printf("%d working on %s\n", i, data)
+		urls, err := getLinks(data)
 		if err != nil {
 			results <- urls
 			continue
@@ -110,8 +115,10 @@ func getDates() []string {
 	return dates
 }
 
-func getLinks(url string) ([]string, error) {
+func getLinks(data Data) ([]string, error) {
 	var urls []string
+
+	url := fmt.Sprintf(URL, data.Ticker, data.Date)
 
 	resp, err := http.Get(url)
 	defer resp.Body.Close()
@@ -175,7 +182,7 @@ func getLinks(url string) ([]string, error) {
 }
 
 func main() {
-	jobs := make(chan string, 100)
+	jobs := make(chan Data, 100)
 	results := make(chan []string, 100)
 
 	for w := 0; w < 1; w++ {
@@ -183,7 +190,7 @@ func main() {
 	}
 
 	var urls []string
-	jobs <- fmt.Sprintf(URL, "GOOGL", "2016-03-18")
+	jobs <- Data{"GOOGL", "2016-03-18"}
 	urls = <-results
 
 	fmt.Println(urls)
