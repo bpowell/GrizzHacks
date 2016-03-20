@@ -17,7 +17,12 @@ $( document ).ready(function() {
     url: 'http://104.131.18.185:8080/api/getday',
     data: { ticker: "googl", date: "2016-Mar-18" },
     success:function(a){
-      InitChart(a);
+      var time_close = [];
+      for (i = 0; i < a.length; i++) { 
+        time_close.push({"Timestamp":a[i].Timestamp, "Close":a[i].Close});
+      }
+      console.log(time_close);
+      InitChart(time_close);
     },
     error: function(){
       console.log("Handle error")
