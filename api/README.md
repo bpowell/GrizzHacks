@@ -6,3 +6,4 @@
 3. /api/getday POST Requires: {ticker: '', date: '2016-Mar-18'}
 4. /api/gettickers GET
 5. /api/getarticleids POST Requies: {ticker: ''}
+6. /api/getarticle POST Requires: {id: ''}
