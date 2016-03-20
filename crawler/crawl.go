@@ -223,8 +223,9 @@ func getPageAndStore(url, date, ticker string) {
 		return
 	}
 
-	d, _ := time.Parse("2006-02-06", date)
+	d, _ := time.Parse("2006-2-06", date)
 	fmt.Println(date)
+	fmt.Println(d.Unix())
 
 	_, err = stmt.Exec(url, d.Unix(), ticker, string(body))
 	if err != nil {
@@ -249,21 +250,32 @@ func main() {
 	jobs := make(chan Data, 100)
 	results := make(chan Data, 100)
 
-	for w := 0; w < 1; w++ {
+	for w := 0; w < 4; w++ {
 		go workerpoolGetUrlsToGrab(w, jobs, results)
 	}
 
-	var data Data
-	jobs <- Data{"GOOGL", "2016-03-18", nil, ""}
-	data = <-results
+	var datas []Data
+
+	for _, ticker := range getAllTickers() {
+		for _, date := range getDates() {
+			var data Data
+			jobs <- Data{ticker, date, nil, ""}
+			data = <-results
+			datas = append(datas, data)
+		}
+	}
 
 	jobs2 := make(chan Data, 100)
 	results2 := make(chan bool, 100)
 
-	for w := 0; w < 1; w++ {
+	for w := 0; w < 4; w++ {
 		go workerpoolGetPageBodies(w, jobs2, results2)
 	}
 
-	jobs2 <- Data{data.Ticker, data.Date, nil, data.Urls[0]}
-	<-results2
+	for _, data := range datas {
+		for _, url := range data.Urls {
+			jobs2 <- Data{data.Ticker, data.Date, nil, url}
+			<-results2
+		}
+	}
 }
