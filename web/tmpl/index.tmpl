@@ -2,8 +2,10 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 
 <head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
 <link href="/css/stocks.css" rel="stylesheet" type="text/css" />
 <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+<link href="http://getbootstrap.com/examples/justified-nav/justified-nav.css" rel="stylesheet">
 </head>
 
 <body>
@@ -28,6 +30,7 @@
 		</div>
 		<div class="col-md-3"></div>
 	</div>
+    <script type="text/javascript" src="http://twitter.github.com/typeahead.js/releases/latest/typeahead.bundle.min.js"></script>
     <script type="text/javascript">
         var countries = new Bloodhound({
                 datumTokenizer: Bloodhound.tokenizers.whitespace,
@@ -37,9 +40,15 @@
                 prefetch: 'http://104.131.18.185:8080/api/gettickers'
         });
 
-        $('#prefetch .typeahead').typeahead(null, {
-                  name: 'countries',
-                  source: countries
+        $(document).ready(function(){
+                $('#prefetch .typeahead').typeahead({
+                    highlight: true
+                        }, {
+                name: 'countries',
+                source: countries
+            });
+
+            document.getElementsByClassName('twitter-typeahead')[0].removeAttribute('style');
         });
     </script>
 </body>
