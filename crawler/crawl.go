@@ -46,6 +46,7 @@ type Data struct {
 	Ticker string
 	Date   string
 	Urls   []string
+	Url    string
 }
 
 func init() {
@@ -245,7 +246,7 @@ func main() {
 	}
 
 	var data Data
-	jobs <- Data{"GOOGL", "2016-03-18", nil}
+	jobs <- Data{"GOOGL", "2016-03-18", nil, ""}
 	data = <-results
 
 	fmt.Println(data)
