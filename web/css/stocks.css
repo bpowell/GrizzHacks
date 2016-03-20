@@ -38,11 +38,22 @@ Stocks Color Reference List:
 
 .input-group-btn .btn-default {
 	position: fixed !important;
-	top: 0px;
-	right: 30px;
-	color: #333;
-	border-color: #333;
-	background-color: #BEBEBE;
+	bottom: 0px;
+	right: 0px;
+	color: #FFFFFF;
+	border-color: #FFFFFF;
+	background-color: #FFFFFF;
+	z-index: -100;
+}
+
+.input-group-btn .btn-default:hover {
+	position: fixed !important;
+	bottom: 0px;
+	right: 0px;
+	color: #FFFFFF;
+	border-color: #FFFFFF;
+	background-color: #FFFFFF;
+	z-index: -100;
 }
 
 .input-group .form-control {
