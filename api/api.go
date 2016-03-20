@@ -38,6 +38,11 @@ type Stock struct {
 	Volume    float32
 }
 
+type ArticleIdAndDate struct {
+	Id   int
+	Date string
+}
+
 func init() {
 	file, err := os.Open("config.json")
 	if err != nil {
@@ -172,6 +177,76 @@ func getAllTickers(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(ticker))
 }
 
+func getIdsForArticlesForTicker(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "Invalid Request!", http.StatusMethodNotAllowed)
+		return
+	}
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	r.ParseForm()
+	ticker := strings.ToLower(r.PostFormValue("ticker"))
+
+	if ticker == "" {
+		http.Error(w, "Invalid Request!", http.StatusBadRequest)
+		return
+	}
+
+	var data []ArticleIdAndDate
+	rows, err := db.Query("select id, pubdate from articles where ticker = $1", strings.ToUpper(ticker))
+	if err != nil {
+		panic(err)
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var d ArticleIdAndDate
+		if err = rows.Scan(&d.Id, &d.Date); err != nil {
+			panic(err)
+		}
+		data = append(data, d)
+	}
+
+	if err := json.NewEncoder(w).Encode(data); err != nil {
+		panic(err)
+	}
+}
+
+func getRawArticleById(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "Invalid Request!", http.StatusMethodNotAllowed)
+		return
+	}
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	r.ParseForm()
+	id := strings.ToLower(r.PostFormValue("id"))
+
+	if id == "" {
+		http.Error(w, "Invalid Request!", http.StatusBadRequest)
+		return
+	}
+
+	rows, err := db.Query("select raw from articles where id = $1", id)
+	if err != nil {
+		panic(err)
+	}
+
+	defer rows.Close()
+
+	var raw string
+	for rows.Next() {
+		if err = rows.Scan(&raw); err != nil {
+			panic(err)
+		}
+	}
+
+	w.Write([]byte(raw))
+}
+
 func main() {
 	fmt.Println(config)
 
@@ -179,5 +254,7 @@ func main() {
 	http.HandleFunc("/api/getrange", getRangeForStock)
 	http.HandleFunc("/api/getday", getDayForStock)
 	http.HandleFunc("/api/gettickers", getAllTickers)
+	http.HandleFunc("/api/getarticleids", getIdsForArticlesForTicker)
+	http.HandleFunc("/api/getarticle", getRawArticleById)
 	http.ListenAndServe(":8080", nil)
 }
