@@ -83,8 +83,8 @@ $( document ).ready(function() {
                             bottom: 20,
                             left: 50
                         },
-                        xScale = d3.scale.linear().range([MARGINS.left, WIDTH - MARGINS.right]).domain([755, 765]),
-                        yScale = d3.scale.linear().range([HEIGHT - MARGINS.top, MARGINS.bottom]).domain([24305130, 24305138]),
+                        xScale = d3.scale.linear().range([MARGINS.left, WIDTH - MARGINS.right]).domain([24305130, 24305138]),
+                        yScale = d3.scale.linear().range([HEIGHT - MARGINS.top, MARGINS.bottom]).domain([755, 765]),
                         xAxis = d3.svg.axis()
                         .scale(xScale),
                         yAxis = d3.svg.axis()
@@ -101,10 +101,10 @@ $( document ).ready(function() {
                         .call(yAxis);
                     var lineGen = d3.svg.line()
                         .x(function(d) {
-                            return xScale(d.Close);
+                            return xScale(d.Timestamp);
                         })
                         .y(function(d) {
-                            return yScale(d.Timestamp);
+                            return yScale(d.Close);
                         })
                         .interpolate("basis");
                     vis.append('svg:path')
