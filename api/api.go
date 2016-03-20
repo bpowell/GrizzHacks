@@ -40,9 +40,10 @@ type Stock struct {
 }
 
 type ArticleIdAndDate struct {
-	Id   int
-	Date string
-	Url  string
+	Id    int
+	Date  string
+	Url   string
+	Title string
 }
 
 type UniqueWords struct {
@@ -212,7 +213,7 @@ func getIdsForArticlesForTicker(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var data []ArticleIdAndDate
-	rows, err := db.Query("select id, pubdate, url from articles where ticker = $1", strings.ToUpper(ticker))
+	rows, err := db.Query("select id, pubdate, url, title from articles where ticker = $1", strings.ToUpper(ticker))
 	if err != nil {
 		panic(err)
 	}
@@ -221,7 +222,7 @@ func getIdsForArticlesForTicker(w http.ResponseWriter, r *http.Request) {
 
 	for rows.Next() {
 		var d ArticleIdAndDate
-		if err = rows.Scan(&d.Id, &d.Date, &d.Url); err != nil {
+		if err = rows.Scan(&d.Id, &d.Date, &d.Url, &d.Title); err != nil {
 			panic(err)
 		}
 		data = append(data, d)
