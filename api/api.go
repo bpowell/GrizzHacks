@@ -44,6 +44,14 @@ type ArticleIdAndDate struct {
 	Date string
 }
 
+type UniqueWords struct {
+	Id        int
+	Word      string
+	Weights   float32
+	Count     int
+	ArticleId int
+}
+
 func init() {
 	file, err := os.Open("config.json")
 	if err != nil {
@@ -355,6 +363,48 @@ func addUniqueWordForArticle(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("OK"))
 }
 
+func getAllWordsForArticle(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "Invalid Request!", http.StatusMethodNotAllowed)
+		return
+	}
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	r.ParseForm()
+	article_id := strings.ToLower(r.PostFormValue("article_id"))
+
+	if article_id == "" {
+		http.Error(w, "Invalid Request!", http.StatusBadRequest)
+		return
+	}
+
+	if validateArticleId(article_id) != nil {
+		http.Error(w, "Invalid Request!", http.StatusBadRequest)
+		return
+	}
+
+	rows, err := db.Query("select id, word, weights, count, article_id from uniquewords where article_id = $1", article_id)
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+
+	var words []UniqueWords
+
+	for rows.Next() {
+		var word UniqueWords
+		if err = rows.Scan(&word.Id, &word.Word, &word.Weights, &word.Count, &word.ArticleId); err != nil {
+			panic(err)
+		}
+		words = append(words, word)
+	}
+
+	if err := json.NewEncoder(w).Encode(words); err != nil {
+		panic(err)
+	}
+}
+
 func main() {
 	fmt.Println(config)
 
@@ -367,5 +417,6 @@ func main() {
 	http.HandleFunc("/api/updatecount", updateCountForWord)
 	http.HandleFunc("/api/updateweights", updateWeightsForWord)
 	http.HandleFunc("/api/adduniqueword", addUniqueWordForArticle)
+	http.HandleFunc("/api/getwodsforarticle", getAllWordsForArticle)
 	http.ListenAndServe(":8080", nil)
 }
