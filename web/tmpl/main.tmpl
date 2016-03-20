@@ -107,10 +107,10 @@
 			<div class="col-md-3 stocksMainContent">
 				<div class="panel panel-default">
           <div class="panel-heading">
-            <p>Test Panel Head</p>
+              <p>Articles for {{ .Ticker }}</p>
           </div>
 					<div class="panel-body">
-						<svg class="visualisation" width="100%"; height="500"></svg>
+                        <ul id="links"></ul>
 					</div>
 				</div>
 			</div>
@@ -141,20 +141,28 @@
 			<div class="col-sm-1"></div>
 		</div>
 	</div>
-    <script type="text/html">
-        $( document ).ready(function() {
-            $.ajax({
-                type: "POST",
-                url: 'http://104.131.18.185:8080/api/getarticleids',
-                data: { ticker: "{{ .Ticker }}"},
-                success:function(a){
-                    console.log(a);
-                },
-                error: function(){
-                    console.log("Handle error")
-                },
-                dataType: 'json'
+    <script type="text/javascript">
+            $( document ).ready(function() {
+                $.ajax({
+                    type: "POST",
+                    url: 'http://104.131.18.185:8080/api/getarticleids',
+                    data: { ticker: "{{ .Ticker }}"},
+                    success:function(a){
+                        if (a.length>10) {
+                            size = 10;
+                        } else {
+                            size = a.length;
+                        }
+
+                        for(i=0; i<size; i++) {
+                            $( "#links" ).append( "<li><a href=\""+a[i].Url+"\">Article!</a></li>" );
+                        }
+                    },
+                    error: function(){
+                        console.log("Handle error")
+                    },
+                    dataType: 'json'
+                });
             });
-        });
     </script>
 </body>
