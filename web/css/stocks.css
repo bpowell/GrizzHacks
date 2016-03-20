@@ -66,3 +66,12 @@ body {
 	border-color: #333;
 	border-radius: 3px;
 }
+
+.chart div {
+  font: 10px sans-serif;
+  background-color: steelblue;
+  text-align: right;
+  padding: 3px;
+  margin: 1px;
+  color: white;
+}
