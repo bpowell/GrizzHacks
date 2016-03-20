@@ -80,7 +80,6 @@ body {
 
 .chart div {
   font: 10px sans-serif;
-  background-color: steelblue;
   text-align: right;
   padding: 3px;
   margin: 1px;
@@ -93,4 +92,17 @@ body {
 
 .carlos {
 	margin-left: 45%;
+}
+
+.poop {
+  background-color: steelblue;
+	height: 80px;
+}
+.poopLess {
+  background-color: red;
+	height: 80px;
+}
+.poopGreat {
+  background-color: green;
+	height: 80px;
 }
