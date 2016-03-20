@@ -168,6 +168,8 @@ func getDayForStock(w http.ResponseWriter, r *http.Request) {
 }
 
 func getAllTickers(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
 	rows, err := db.Query("select array_to_json(array_agg(ticker)) as ticker from tickers")
 	if err != nil {
 		panic(err)
