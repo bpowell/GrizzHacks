@@ -37,6 +37,9 @@ Stocks Color Reference List:
 }
 
 .input-group-btn .btn-default {
+	position: fixed !important;
+	top: 0px;
+	right: 30px;
 	color: #333;
 	border-color: #333;
 	background-color: #BEBEBE;
