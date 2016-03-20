@@ -43,6 +43,7 @@ type Article struct {
 type Data struct {
 	Ticker string
 	Date   string
+	Urls   []string
 }
 
 func init() {
@@ -64,16 +65,17 @@ func init() {
 	}
 }
 
-func workerpoolGetUrlsToGrab(i int, jobs <-chan Data, results chan<- []string) {
+func workerpoolGetUrlsToGrab(i int, jobs <-chan Data, results chan<- Data) {
 	for data := range jobs {
 		fmt.Printf("%d working on %s\n", i, data)
 		urls, err := getLinks(data)
 		if err != nil {
-			results <- urls
+			results <- data
 			continue
 		}
 
-		results <- urls
+		data.Urls = urls
+		results <- data
 	}
 }
 
@@ -183,15 +185,15 @@ func getLinks(data Data) ([]string, error) {
 
 func main() {
 	jobs := make(chan Data, 100)
-	results := make(chan []string, 100)
+	results := make(chan Data, 100)
 
 	for w := 0; w < 1; w++ {
 		go workerpoolGetUrlsToGrab(w, jobs, results)
 	}
 
-	var urls []string
-	jobs <- Data{"GOOGL", "2016-03-18"}
-	urls = <-results
+	var data Data
+	jobs <- Data{"GOOGL", "2016-03-18", nil}
+	data = <-results
 
-	fmt.Println(urls)
+	fmt.Println(data.Urls)
 }
