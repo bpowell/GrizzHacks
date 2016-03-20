@@ -55,7 +55,7 @@ type UniqueWords struct {
 
 type NLPWords struct {
 	Word   string
-	Count  int
+	Weight int
 	Ticker string
 }
 
@@ -467,7 +467,7 @@ func getNLPWords(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rows, err := db.Query("select word, uniquewords.count, articles.ticker from uniquewords, articles where uniquewords.article_id = articles.id and articles.ticker = $1", ticker)
+	rows, err := db.Query("select word, uniquewords.weight, articles.ticker from uniquewords, articles where uniquewords.article_id = articles.id and articles.ticker = $1", ticker)
 	if err != nil {
 		panic(err)
 	}
@@ -477,7 +477,7 @@ func getNLPWords(w http.ResponseWriter, r *http.Request) {
 
 	for rows.Next() {
 		var t NLPWords
-		if err = rows.Scan(&t.Word, &t.Count, &t.Ticker); err != nil {
+		if err = rows.Scan(&t.Word, &t.Weight, &t.Ticker); err != nil {
 			panic(err)
 		}
 		things = append(things, t)
