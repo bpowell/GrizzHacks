@@ -141,4 +141,20 @@
 			<div class="col-sm-1"></div>
 		</div>
 	</div>
+    <script type="text/html">
+        $( document ).ready(function() {
+            $.ajax({
+                type: "POST",
+                url: 'http://104.131.18.185:8080/api/getarticleids',
+                data: { ticker: "{{ .Ticker }}"},
+                success:function(a){
+                    console.log(a);
+                },
+                error: function(){
+                    console.log("Handle error")
+                },
+                dataType: 'json'
+            });
+        });
+    </script>
 </body>
