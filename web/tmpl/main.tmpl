@@ -19,7 +19,10 @@ $( document ).ready(function() {
     success:function(a){
       var time_close = [];
       for (i = 0; i < a.length; i++) { 
-        time_close.push({"Timestamp":a[i].Timestamp, "Close":a[i].Close});
+				var newtimestamp = Date.parse(a[i].Timestamp);
+				newtimestamp = newtimestamp/60000;
+				console.log(newtimestamp);
+        time_close.push({"Timestamp":newtimestamp, "Close":a[i].Close});
       }
       console.log(time_close);
       InitChart(time_close);
