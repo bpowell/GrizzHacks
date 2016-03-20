@@ -20,20 +20,24 @@
 										data: { ticker: "googl", date: "2016-Mar-18" },
 										success:function(a){
 											var time_close = [];
-											min = a[0].Timestamp;
-											max = a[0].Timestamp;
+											min = Date.parse(a[0].Timestamp);
+											min = min / 60000;
+											max = Date.parse(a[0].Timestamp);
+											max = max / 60000;
 											for (i = 0; i < a.length; i++) {
-												if (a[i].Timestamp > max) {
-													max = a[i].Timestamp;
-												}
-												if (a[i].Timestamp < min) {
-													min = a[i].Timestamp;
-												}
-
 												var newtimestamp = Date.parse(a[i].Timestamp);
 												newtimestamp = newtimestamp/60000;
 												time_close.push({"Timestamp":newtimestamp, "Close":a[i].Close});
+
+												if (newtimestamp > max) {
+													max = newtimestamp;
+												}
+												if (newtimestamp < min) {
+													min = newtimestamp;
+												}
 											}
+											console.log("FINAL_MIN = " + min);
+											console.log("FINAL_MAX = " + max);
 											InitChart(time_close);
 										},
 										error: function(){
