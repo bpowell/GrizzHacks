@@ -11,12 +11,14 @@ import (
 	"strings"
 	"time"
 
-	_ "github.com/lib/pq"
+	"github.com/lib/pq"
 	"golang.org/x/net/html"
 )
 
 var config Configuration
 var db *sql.DB
+
+const shortForm = "2006-Jan-02"
 
 const URL = "http://finance.yahoo.com/q/h?s=%s&t=%s"
 
@@ -101,7 +103,6 @@ func getAllTickers() []string {
 func getDates() []string {
 	var dates []string
 
-	const shortForm = "2006-Jan-02"
 	start, _ := time.Parse(shortForm, "2016-Jan-03")
 	end, _ := time.Parse(shortForm, "2016-Mar-19")
 
@@ -183,6 +184,58 @@ func getLinks(data Data) ([]string, error) {
 	return urls, nil
 }
 
+func getPageAndStore(url, date, ticker string) {
+	resp, err := http.Get(url)
+	defer resp.Body.Close()
+	if err != nil {
+		return
+	}
+
+	if resp.StatusCode != 200 {
+		fmt.Printf("Cannot get %s\n", url)
+		return
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	txn, err := db.Begin()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	stmt, err := txn.Prepare(pq.CopyIn("articles", "url", "pubdate", "ticker", "raw"))
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	d, _ := time.Parse("2006-02-06", date)
+	fmt.Println(date)
+
+	_, err = stmt.Exec(url, d.Unix(), ticker, string(body))
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	err = stmt.Close()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	err = txn.Commit()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+}
+
 func main() {
 	jobs := make(chan Data, 100)
 	results := make(chan Data, 100)
@@ -195,5 +248,6 @@ func main() {
 	jobs <- Data{"GOOGL", "2016-03-18", nil}
 	data = <-results
 
-	fmt.Println(data.Urls)
+	fmt.Println(data)
+	getPageAndStore(data.Urls[0], data.Date, data.Ticker)
 }
