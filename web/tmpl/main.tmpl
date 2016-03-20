@@ -124,13 +124,24 @@
             <p>Word Weight for {{ .Ticker }}</p>
           </div>
 					<div class="panel-body">
-						<div class="chart">
-							<div style="width: 40px;">Word: 4</div>
-							<div style="width: 80px;">Poop: 8</div>
-							<div style="width: 150px;">Brandon: 15</div>
-							<div style="width: 160px;">Dirt: 16</div>
-							<div style="width: 230px;">Shareholder: 23</div>
-							<div style="width: 420px;">Soap: 42</div>
+						<div class="chart"></div>
+							<script src="//d3js.org/d3.v3.min.js"></script>
+							<script>
+
+							var data = [4, 8, 15, 16, 23, 42];
+
+							var x = d3.scale.linear()
+									.domain([0, d3.max(data)])
+									.range([0, 420]);
+
+							d3.select(".chart")
+								.selectAll("div")
+									.data(data)
+								.enter().append("div")
+									.style("width", function(d) { return x(d) + "px"; })
+									.text(function(d) { return d; });
+
+							</script>
 						</div>
 					</div>
 				</div>
