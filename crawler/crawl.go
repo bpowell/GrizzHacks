@@ -68,6 +68,14 @@ func init() {
 	}
 }
 
+func workerpoolGetPageBodies(i int, jobs <-chan Data, results chan<- bool) {
+	for data := range jobs {
+		fmt.Printf("%d working on %s\n", i, data)
+		getPageAndStore(data.Url, data.Date, data.Ticker)
+		results <- true
+	}
+}
+
 func workerpoolGetUrlsToGrab(i int, jobs <-chan Data, results chan<- Data) {
 	for data := range jobs {
 		fmt.Printf("%d working on %s\n", i, data)
@@ -249,6 +257,13 @@ func main() {
 	jobs <- Data{"GOOGL", "2016-03-18", nil, ""}
 	data = <-results
 
-	fmt.Println(data)
-	getPageAndStore(data.Urls[0], data.Date, data.Ticker)
+	jobs2 := make(chan Data, 100)
+	results2 := make(chan bool, 100)
+
+	for w := 0; w < 1; w++ {
+		go workerpoolGetPageBodies(w, jobs2, results2)
+	}
+
+	jobs2 <- Data{data.Ticker, data.Date, nil, data.Urls[0]}
+	<-results2
 }
