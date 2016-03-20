@@ -7,3 +7,4 @@
 4. /api/gettickers GET
 5. /api/getarticleids POST Requies: {ticker: ''}
 6. /api/getarticle POST Requires: {id: ''}
+7. /api/updatecount POST Requires: {id: '', count: ''}
