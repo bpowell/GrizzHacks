@@ -408,7 +408,7 @@ func getAllWordsForArticle(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getWeightByWord(w http.ResponseWriter, r *http.Request) {
+func getUniqueWordsInfoByWord(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "Invalid Request!", http.StatusMethodNotAllowed)
 		return
@@ -424,16 +424,25 @@ func getWeightByWord(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var weight float32
-	err := db.QueryRow("select weights from uniquewords where word = $1", word).Scan(&weight)
-	switch {
-	case err != nil:
-		http.Error(w, "Invalid Request!", http.StatusBadRequest)
-		return
+	rows, err := db.Query("select id, weights, count, article_id from uniquewords where word = $1", word)
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+
+	var things []UniqueWords
+
+	for rows.Next() {
+		var t UniqueWords
+		if err = rows.Scan(&t.Id, &t.Weights, &t.Count, &t.ArticleId); err != nil {
+			panic(err)
+		}
+		things = append(things, t)
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte(fmt.Sprintf("[%f]", weight)))
+	if err := json.NewEncoder(w).Encode(things); err != nil {
+		panic(err)
+	}
 }
 
 func main() {
@@ -449,6 +458,6 @@ func main() {
 	http.HandleFunc("/api/updateweights", updateWeightsForWord)
 	http.HandleFunc("/api/adduniqueword", addUniqueWordForArticle)
 	http.HandleFunc("/api/getwodsforarticle", getAllWordsForArticle)
-	http.HandleFunc("/api/getWeightByWord", getWeightByWord)
+	http.HandleFunc("/api/getinfoforword", getUniqueWordsInfoByWord)
 	http.ListenAndServe(":8080", nil)
 }
