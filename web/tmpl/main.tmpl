@@ -4,7 +4,7 @@
 			<div class="col-md-7 stocksMainContent">
 				<div class="panel panel-default">
           <div class="panel-heading">
-              <p>Yesterdays {{ .Ticker }} Ticker {{ .Date }}</p>
+              <p>{{ .Date }} {{ .Ticker }} Ticker</p>
           </div>
 					<div class="panel-body">
 						<div class="jumbotron">
@@ -101,8 +101,10 @@
                 }
             	</script>
         		</div>
-                <a href="/main?ticker={{ .Ticker }}&date={{ .PrevDate }}">Prev day</a>
-                <a href="/main?ticker={{ .Ticker }}&date={{ .NextDate }}">Next day</a>
+						<div class="carlos">
+							<button><a href="/main?ticker={{ .Ticker }}&date={{ .PrevDate }}">Prev day</a></button>
+							<button><a href="/main?ticker={{ .Ticker }}&date={{ .NextDate }}">Next day</a></button>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -131,14 +133,6 @@
 				</div>
 			</div>
 			<div class="col-md-4 stocksMainContent">
-				<div class="panel panel-default">
-          <div class="panel-heading">
-            <p>Test Panel Head</p>
-          </div>
-					<div class="panel-body">
-						<svg class="visualisation" width="100%"; height="500"></svg>
-					</div>
-				</div>
 			</div>
 			<div class="col-sm-1"></div>
 		</div>
@@ -157,7 +151,7 @@
                         }
 
                         for(i=0; i<size; i++) {
-                            $( "#links" ).append( "<li><a href=\""+a[i].Url+"\">Article!</a></li>" );
+                            $( "#links" ).append( "<li><a href=\""+a[i].Url+"\">" + a[i].Title + "</a></li>" );
                         }
                     },
                     error: function(){

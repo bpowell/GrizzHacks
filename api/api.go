@@ -40,9 +40,10 @@ type Stock struct {
 }
 
 type ArticleIdAndDate struct {
-	Id   int
-	Date string
-	Url  string
+	Id    int
+	Date  string
+	Url   string
+	Title string
 }
 
 type UniqueWords struct {
@@ -51,6 +52,12 @@ type UniqueWords struct {
 	Weights   float32
 	Count     int
 	ArticleId int
+}
+
+type NLPWords struct {
+	Word   string
+	Weight float32
+	Ticker string
 }
 
 func init() {
@@ -206,7 +213,7 @@ func getIdsForArticlesForTicker(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var data []ArticleIdAndDate
-	rows, err := db.Query("select id, pubdate, url from articles where ticker = $1", strings.ToUpper(ticker))
+	rows, err := db.Query("select id, pubdate, url, title from articles where ticker = $1", strings.ToUpper(ticker))
 	if err != nil {
 		panic(err)
 	}
@@ -215,7 +222,7 @@ func getIdsForArticlesForTicker(w http.ResponseWriter, r *http.Request) {
 
 	for rows.Next() {
 		var d ArticleIdAndDate
-		if err = rows.Scan(&d.Id, &d.Date, &d.Url); err != nil {
+		if err = rows.Scan(&d.Id, &d.Date, &d.Url, &d.Title); err != nil {
 			panic(err)
 		}
 		data = append(data, d)
@@ -445,6 +452,43 @@ func getUniqueWordsInfoByWord(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func getNLPWords(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "Invalid Request!", http.StatusMethodNotAllowed)
+		return
+	}
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	r.ParseForm()
+	ticker := strings.ToUpper(r.PostFormValue("ticker"))
+
+	if ticker == "" {
+		http.Error(w, "Invalid Request!", http.StatusBadRequest)
+		return
+	}
+
+	rows, err := db.Query("select word, uniquewords.weights, articles.ticker from uniquewords, articles where uniquewords.article_id = articles.id and articles.ticker = $1", ticker)
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+
+	var things []NLPWords
+
+	for rows.Next() {
+		var t NLPWords
+		if err = rows.Scan(&t.Word, &t.Weight, &t.Ticker); err != nil {
+			panic(err)
+		}
+		things = append(things, t)
+	}
+
+	if err := json.NewEncoder(w).Encode(things); err != nil {
+		panic(err)
+	}
+}
+
 func main() {
 	fmt.Println(config)
 
@@ -459,5 +503,6 @@ func main() {
 	http.HandleFunc("/api/adduniqueword", addUniqueWordForArticle)
 	http.HandleFunc("/api/getwodsforarticle", getAllWordsForArticle)
 	http.HandleFunc("/api/getinfoforword", getUniqueWordsInfoByWord)
+	http.HandleFunc("/api/getnlpwords", getNLPWords)
 	http.ListenAndServe(":8080", nil)
 }
